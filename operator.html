@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operator Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fbff;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(17, 36, 51, 0.65);
+      border-radius: 24px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    thead {
+      background: rgba(15, 23, 42, 0.75);
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.35);
+    }
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.55);
+    }
+    tbody tr td button {
+      margin: 0.25rem 0.25rem 0;
+      padding: 0.35rem 0.75rem;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    tbody tr td button.completed {
+      background: #20bf55;
+      color: #fff;
+    }
+    tbody tr td button:not(.completed) {
+      background: rgba(255, 255, 255, 0.15);
+      color: #f8fbff;
+    }
+    #exportCsv {
+      margin-top: 1rem;
+    }
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .details-btn {
+      background: rgba(14, 165, 233, 0.25);
+      color: #38bdf8;
+      border-radius: 12px;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .details-btn:hover,
+    .details-btn:focus {
+      background: rgba(56, 189, 248, 0.35);
+      color: #f8fbff;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 18, 34, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 20px;
+      max-width: 640px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+      position: relative;
+      color: #f8fbff;
+    }
+    .modal h3 {
+      margin-top: 0;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-section {
+      margin-top: 1.25rem;
+    }
+    .modal-progress {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .modal-progress li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(148, 163, 184, 0.12);
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+    }
+    .modal-progress li .status-indicator {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #f97316;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-progress li.completed {
+      background: rgba(34, 197, 94, 0.2);
+    }
+    .modal-progress li.completed .status-indicator {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+    .notes-area textarea {
+      width: 100%;
+      min-height: 120px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.65);
+      color: #f8fbff;
+      padding: 0.75rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .notes-area button {
+      margin-top: 0.75rem;
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .selfie-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 16px;
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      padding: 1rem;
+      min-height: 180px;
+    }
+    .selfie-preview img {
+      max-width: 220px;
+      border-radius: 16px;
+      border: 4px solid rgba(56, 189, 248, 0.35);
+    }
+    .selfie-preview p {
+      color: #94a3b8;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Operator Panel</h2>
+    <div class="meta">
+      <label for="pin">Enter Operator PIN</label>
+      <input type="password" id="pin" placeholder="Enter PIN" />
+      <button id="loginBtn" class="primary">Login</button>
+      <button id="exportCsv" class="secondary" style="display:none;">Export CSV</button>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+      <table id="recordsTable">
+        <thead>
+          <tr>
+            <th>Customer #</th>
+            <th>Name</th>
+            <th>Payment</th>
+            <th>Emails</th>
+            <th>Prints</th>
+            <th>Photo ID</th>
+            <th>Status</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="receiptModal" class="modal-backdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button id="modalClose" class="modal-close" aria-label="Close receipt details">&times;</button>
+        <h3 id="modalTitle">Receipt Details</h3>
+        <div class="modal-section">
+          <h4>Status Progress</h4>
+          <ol id="modalProgress" class="modal-progress"></ol>
+        </div>
+        <div class="modal-section notes-area">
+          <h4>Notes</h4>
+          <textarea id="modalNotes" placeholder="Add operator notes..."></textarea>
+          <button id="saveNotes" type="button">Save Notes</button>
+        </div>
+        <div class="modal-section">
+          <h4>Quick Selfie</h4>
+          <div class="selfie-preview" id="selfiePreview">
+            <p>No selfie available for this receipt.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const PIN = "1234";
+    const loginBtn = document.getElementById("loginBtn");
+    const dashboard = document.getElementById("dashboard");
+    const exportBtn = document.getElementById("exportCsv");
+    const modalBackdrop = document.getElementById("receiptModal");
+    const modalCloseBtn = document.getElementById("modalClose");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalProgress = document.getElementById("modalProgress");
+    const modalNotes = document.getElementById("modalNotes");
+    const saveNotesBtn = document.getElementById("saveNotes");
+    const selfiePreview = document.getElementById("selfiePreview");
+
+    const STATUS_ENTRIES = [
+      { label: 'Paid', key: 'paid' },
+      { label: 'Email Sent', key: 'emailed' },
+      { label: 'Printed', key: 'printed' },
+      { label: 'Picked Up', key: 'pickedUp' },
+      { label: 'Photo Taken', key: 'photoTaken' }
+    ];
+
+    let recordsCache = [];
+    let operatorMeta = {};
+    let activeRecordId = null;
+
+    loginBtn.addEventListener("click", () => {
+      const input = document.getElementById("pin").value;
+      if (input === PIN) {
+        dashboard.style.display = "block";
+        exportBtn.style.display = "inline-flex";
+        loadRecords();
+      } else {
+        alert("Invalid PIN");
+      }
+    });
+
+    exportBtn.addEventListener("click", () => {
+      const rows = Array.from(document.querySelectorAll('#recordsTable tbody tr'));
+      const headers = ["Customer #","Name","Payment","Emails","Prints","Photo ID","Status"];
+      const csv = [headers.join(',')];
+      rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        const statusLabels = Array.from(cells[6].querySelectorAll('button'))
+          .map(btn => `${btn.dataset.action}:${btn.classList.contains('completed') ? 'done' : 'pending'}`)
+          .join('|');
+        const values = [
+          cells[0].textContent.trim(),
+          cells[1].textContent.trim(),
+          cells[2].textContent.trim(),
+          cells[3].textContent.trim(),
+          cells[4].textContent.trim(),
+          cells[5].textContent.trim(),
+          statusLabels
+        ];
+        csv.push(values.join(','));
+      });
+      const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'records.csv';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    });
+
+    async function loadRecords() {
+      let data = [];
+      try {
+        const res = await fetch('records.json');
+        if (!res.ok) {
+          throw new Error('Missing records file');
+        }
+        data = await res.json();
+      } catch (error) {
+        const stored = JSON.parse(localStorage.getItem('records') || '[]');
+        data = stored;
+      }
+      operatorMeta = loadOperatorMeta();
+      recordsCache = mergeRecordsWithMeta(data);
+      renderRecords(recordsCache);
+    }
+
+    function renderRecords(data) {
+      const tbody = document.querySelector('#recordsTable tbody');
+      tbody.innerHTML = data.map((record, index) => {
+        const id = record.internalId || getRecordId(record, index);
+        const emails = Array.isArray(record.emails) && record.emails.length ? record.emails.join(' | ') : '—';
+        return `
+          <tr data-id="${id}">
+            <td>${record.customerNumber || record.photoID || ''}</td>
+            <td>${record.name || ''}</td>
+            <td>${record.payment || ''}</td>
+            <td>${emails}</td>
+            <td>${record.prints ?? ''}</td>
+            <td>${record.photoID || record.customerNumber || ''}</td>
+            <td class="status-actions">
+              ${renderStatusButtons(record, id)}
+            </td>
+            <td>
+              <button class="details-btn" data-id="${id}">View Receipt</button>
+            </td>
+          </tr>`;
+      }).join('');
+      attachStatusListeners();
+      attachReceiptListeners();
+    }
+
+    function renderStatusButtons(record, recordId) {
+      const status = record.status || {};
+      return STATUS_ENTRIES.map(({ label, key }) => {
+        const completed = Boolean(status[key]);
+        return `<button data-action="${key}" data-id="${recordId}" class="${completed ? 'completed' : ''}">${label}</button>`;
+      }).join('');
+    }
+
+    function attachStatusListeners() {
+      document.querySelectorAll('.status-actions button').forEach(button => {
+        button.addEventListener('click', () => {
+          button.classList.toggle('completed');
+          const id = button.dataset.id;
+          const action = button.dataset.action;
+          const record = recordsCache.find(item => getRecordId(item) === id);
+          if (!record) return;
+          record.status = record.status || {};
+          record.status[action] = button.classList.contains('completed');
+          operatorMeta[id] = operatorMeta[id] || {};
+          operatorMeta[id].status = { ...record.status };
+          saveOperatorMeta();
+          if (activeRecordId === id) {
+            renderModalProgress(record);
+          }
+        });
+      });
+    }
+
+    function attachReceiptListeners() {
+      document.querySelectorAll('.details-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const id = button.dataset.id;
+          openReceiptModal(id);
+        });
+      });
+    }
+
+    function openReceiptModal(recordId) {
+      const record = recordsCache.find(item => getRecordId(item) === recordId);
+      if (!record) return;
+      activeRecordId = recordId;
+      modalTitle.textContent = record.name ? `${record.name} (${recordId})` : `Receipt ${recordId}`;
+      renderModalProgress(record);
+      modalNotes.value = record.notes || '';
+      renderSelfiePreview(record);
+      modalBackdrop.classList.add('visible');
+      modalBackdrop.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      saveNotesBtn.textContent = 'Save Notes';
+      saveNotesBtn.disabled = false;
+      setTimeout(() => modalNotes.focus(), 0);
+    }
+
+    function closeReceiptModal() {
+      modalBackdrop.classList.remove('visible');
+      modalBackdrop.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      activeRecordId = null;
+    }
+
+    function renderModalProgress(record) {
+      modalProgress.innerHTML = STATUS_ENTRIES.map(({ label, key }) => {
+        const completed = Boolean(record.status && record.status[key]);
+        const indicator = completed ? '✓' : '';
+        return `<li class="${completed ? 'completed' : ''}"><span class="status-indicator">${indicator}</span><span>${label}</span></li>`;
+      }).join('');
+    }
+
+    function renderSelfiePreview(record) {
+      if (record.selfieData) {
+        selfiePreview.innerHTML = `<img src="${record.selfieData}" alt="Quick selfie for ${record.name || record.photoID || 'customer'}" />`;
+      } else {
+        selfiePreview.innerHTML = '<p>No selfie available for this receipt.</p>';
+      }
+    }
+
+    function loadOperatorMeta() {
+      try {
+        return JSON.parse(localStorage.getItem('operatorMeta') || '{}');
+      } catch (error) {
+        console.warn('Unable to parse operator metadata', error);
+        return {};
+      }
+    }
+
+    function saveOperatorMeta() {
+      localStorage.setItem('operatorMeta', JSON.stringify(operatorMeta));
+    }
+
+    function mergeRecordsWithMeta(data) {
+      return data.map((record, index) => {
+        const id = getRecordId(record, index);
+        const meta = operatorMeta[id] || {};
+        return {
+          ...record,
+          internalId: id,
+          status: { ...(record.status || {}), ...(meta.status || {}) },
+          notes: meta.notes ?? record.notes ?? '',
+          selfieData: record.selfieData || null
+        };
+      });
+    }
+
+    function getRecordId(record, index) {
+      if (record && record.internalId) {
+        return String(record.internalId);
+      }
+      const fallbackIndex = typeof index === 'number' ? `record-${index}` : '';
+      const derived = record ? (record.photoID || record.customerNumber || record.createdAt || fallbackIndex) : fallbackIndex;
+      if (record) {
+        record.internalId = String(derived);
+      }
+      return String(derived);
+    }
+
+    modalCloseBtn.addEventListener('click', closeReceiptModal);
+    modalBackdrop.addEventListener('click', (event) => {
+      if (event.target === modalBackdrop) {
+        closeReceiptModal();
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modalBackdrop.classList.contains('visible')) {
+        closeReceiptModal();
+      }
+    });
+
+    saveNotesBtn.addEventListener('click', () => {
+      if (!activeRecordId) return;
+      const record = recordsCache.find(item => getRecordId(item) === activeRecordId);
+      if (!record) return;
+      const notes = modalNotes.value.trim();
+      record.notes = notes;
+      operatorMeta[activeRecordId] = operatorMeta[activeRecordId] || {};
+      operatorMeta[activeRecordId].notes = notes;
+      saveOperatorMeta();
+      saveNotesBtn.textContent = 'Notes Saved';
+      saveNotesBtn.disabled = true;
+      setTimeout(() => {
+        saveNotesBtn.textContent = 'Save Notes';
+        saveNotesBtn.disabled = false;
+      }, 1200);
+    });
+  </script>
+</body>
+</html>
