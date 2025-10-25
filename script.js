@@ -277,7 +277,13 @@ function populateEventInfo() {
   }
   const headerName = document.getElementById('eventName');
   headerName.textContent = appConfig.eventName;
-  document.getElementById('eventTagline').textContent = 'Tap to begin your photo experience';
+  const eventTagline = document.getElementById('eventTagline');
+  if (eventTagline) {
+    const taglineText =
+      typeof appConfig.tagline === 'string' ? appConfig.tagline.trim() : '';
+    eventTagline.textContent = taglineText;
+    eventTagline.classList.toggle('hidden', !taglineText);
+  }
   const priceInfo = document.getElementById('price-info');
   const headerPrice = document.getElementById('eventPrice');
   const baseFormatted = formatCurrency(Number(appConfig.price || 0), appConfig.currency);
