@@ -17,12 +17,57 @@
 
     <nav id="progress-indicator" class="progress-indicator" aria-label="Photo experience progress"></nav>
 
-    <section id="screen-welcome" class="screen active">
-      <button class="primary" id="start-btn" title="Tap to begin the kiosk flow">Start</button>
-      <div class="info-card">
-        <h2>Today's Event</h2>
-        <p id="event-name"></p>
-        <p class="price" id="price-info"></p>
+    <section id="screen-welcome" class="screen screen-welcome active" aria-labelledby="welcome-title">
+      <div class="welcome-layout">
+        <div class="welcome-hero">
+          <h2 id="welcome-title"><span id="welcome-event-name">Green Screen Express</span></h2>
+          <p class="welcome-instructions" id="welcome-instructions">
+            Follow the prompts to build your photo package in just a few taps.
+          </p>
+          <button class="primary start-button" id="start-btn" title="Tap to begin the kiosk flow">Start</button>
+        </div>
+
+        <article class="info-card welcome-info" aria-labelledby="welcome-package-title">
+          <header class="welcome-info-header">
+            <h3 id="welcome-package-title">Package overview</h3>
+            <p class="welcome-base-price" id="welcome-base-price">Included with your event</p>
+          </header>
+          <ul class="welcome-option-list">
+            <li class="welcome-option">
+              <span class="option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path d="M6 3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1v3a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-3h1a2 2 0 0 0 2-2V8.5L15.5 3Zm0 2h9v3.5a1.5 1.5 0 0 0 1.5 1.5H19v4a1 1 0 0 1-1 1h-1v-2a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2H6a1 1 0 0 1-1-1V5Zm4 11h4v2h-4Zm-1-4h6v2H9Z" />
+                </svg>
+              </span>
+              <div class="option-copy">
+                <span class="option-title">Prints</span>
+                <span class="option-detail" id="welcome-option-prints">Add professional prints on site.</span>
+              </div>
+            </li>
+            <li class="welcome-option">
+              <span class="option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path d="M4 5a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 2h16v.1l-8 4.6-8-4.6Zm0 2.9 7.4 4.26a1 1 0 0 0 1.2 0L20 9.9V17H4Z" />
+                </svg>
+              </span>
+              <div class="option-copy">
+                <span class="option-title">Emails</span>
+                <span class="option-detail" id="welcome-option-emails">Share digital copies instantly.</span>
+              </div>
+            </li>
+            <li class="welcome-option">
+              <span class="option-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path d="M12 3a1 1 0 0 1 .9.56l1.38 2.8 3.09.46a1 1 0 0 1 .56 1.7l-2.24 2.18.53 3.08a1 1 0 0 1-1.45 1.05L12 13.77l-2.77 1.46a1 1 0 0 1-1.45-1.05l.53-3.08-2.24-2.18a1 1 0 0 1 .56-1.7l3.09-.46L11.1 3.56A1 1 0 0 1 12 3Z" />
+                </svg>
+              </span>
+              <div class="option-copy">
+                <span class="option-title">Add-ons</span>
+                <span class="option-detail" id="welcome-option-addons">Enhance with extra scenes and keepsakes.</span>
+              </div>
+            </li>
+          </ul>
+        </article>
       </div>
     </section>
 
