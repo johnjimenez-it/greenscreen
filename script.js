@@ -31,7 +31,6 @@ const state = {
   background: null,
   backgroundSource: null,
   backgroundSelections: [],
-  customBackgroundData: null,
   partyName: '',
   peopleCount: null,
   deliveryMethod: null,
@@ -245,7 +244,6 @@ function init() {
   populateBackgrounds();
   setupBackgroundAddons();
   populateTouchSelectors();
-  setupCustomBackground();
   setupSelfie();
   setupKeyboard();
   setupIdleTimer();
@@ -327,7 +325,6 @@ function selectBackground(background, optionId) {
   const selection = { ...background, id: selectionId, image: backgroundImage };
 
   state.backgroundSource = 'preset';
-  state.customBackgroundData = null;
 
   if (state.multipleBackgrounds) {
     const existingIndex = state.backgroundSelections.findIndex(item => item.id === selection.id);
@@ -413,9 +410,6 @@ function getBackgroundSummaryText() {
   if (selections.length) {
     return selections.map(item => item.name).join(' + ');
   }
-  if (state.customBackgroundData) {
-    return 'Custom Background';
-  }
   return 'Not selected';
 }
 
@@ -423,9 +417,6 @@ function getBackgroundIdSummary() {
   const selections = getSelectedBackgrounds();
   if (selections.length) {
     return selections.map(item => item.id || 'custom').join(', ');
-  }
-  if (state.customBackgroundData) {
-    return 'custom';
   }
   return 'none';
 }
@@ -550,55 +541,6 @@ function reflectMultiBackgroundState() {
   }
   updateBackgroundOptionSelectionClasses();
   updateBackgroundPreview();
-}
-
-function setupCustomBackground() {
-  const helpButton = document.getElementById('custom-background-help');
-  const modal = document.getElementById('custom-background-modal');
-  const modalClose = document.getElementById('modal-close');
-  const fileInput = document.getElementById('custom-background-input');
-  const useButton = document.getElementById('custom-background-use');
-  if (!helpButton || !modal || !modalClose || !fileInput || !useButton) {
-    return;
-  }
-  useButton.disabled = true;
-
-  helpButton.addEventListener('click', () => modal.classList.remove('hidden'));
-  modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-  modal.addEventListener('click', event => {
-    if (event.target === modal) {
-      modal.classList.add('hidden');
-    }
-  });
-
-  fileInput.addEventListener('change', event => {
-    const file = event.target.files[0];
-    if (!file) {
-      useButton.disabled = true;
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => {
-      state.customBackgroundData = e.target.result;
-      useButton.disabled = false;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  useButton.addEventListener('click', () => {
-    if (!state.customBackgroundData) return;
-    document.querySelectorAll('.background-option').forEach(btn => btn.classList.remove('selected'));
-    state.background = {
-      id: 'custom',
-      name: 'Custom Background',
-      image: `url(${state.customBackgroundData})`
-    };
-    state.backgroundSource = 'custom';
-    state.backgroundSelections = [state.background];
-    state.multipleBackgrounds = false;
-    updatePricingDisplay();
-    alert('Custom background ready!');
-  });
 }
 
 function renderEmailInputs(count = state.emailCount) {
@@ -895,7 +837,6 @@ function resetKiosk() {
     background: null,
     backgroundSource: null,
     backgroundSelections: [],
-    customBackgroundData: null,
     partyName: '',
     peopleCount: null,
     deliveryMethod: null,
@@ -915,8 +856,6 @@ function resetKiosk() {
   document.getElementById('party-name').value = '';
   document.getElementById('emailInputs').innerHTML = '';
   document.getElementById('review-summary').innerHTML = '';
-  document.getElementById('custom-background-input').value = '';
-  document.getElementById('custom-background-use').disabled = true;
   pendingReceipt = null;
   reflectMultiBackgroundState();
   updatePricingDisplay();
