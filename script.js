@@ -100,6 +100,8 @@ function showScreen(targetId) {
     }
   });
 
+  document.body.classList.toggle('welcome-active', targetId === 'screen-welcome');
+
   const progressIndex = progressScreens.indexOf(targetId);
   if (progressIndex !== -1) {
     furthestProgressIndex = Math.max(furthestProgressIndex, progressIndex);
@@ -269,32 +271,27 @@ function setupNavigation() {
 }
 
 function populateEventInfo() {
-  const eventName = document.getElementById('event-name');
-  if (eventName) {
-    eventName.textContent = `${appConfig.eventName}`;
+  const welcomeEventName = document.getElementById('welcome-event-name');
+  if (welcomeEventName) {
+    welcomeEventName.textContent = `${appConfig.eventName}`;
   }
+
   const headerName = document.getElementById('eventName');
-  headerName.textContent = appConfig.eventName;
+  if (headerName) {
+    headerName.textContent = appConfig.eventName;
+  }
+
+  const taglineText = typeof appConfig.tagline === 'string' ? appConfig.tagline.trim() : '';
+
+  const welcomeInstructions = document.getElementById('welcome-instructions');
+  if (welcomeInstructions) {
+    welcomeInstructions.textContent = taglineText || 'Follow the prompts to build your photo package in just a few taps.';
+  }
+
   const eventTagline = document.getElementById('eventTagline');
   if (eventTagline) {
-    const taglineText =
-      typeof appConfig.tagline === 'string' ? appConfig.tagline.trim() : '';
     eventTagline.textContent = taglineText;
     eventTagline.classList.toggle('hidden', !taglineText);
-  }
-  const priceInfo = document.getElementById('price-info');
-  const headerPrice = document.getElementById('eventPrice');
-  const baseFormatted = formatCurrency(Number(appConfig.price || 0), appConfig.currency);
-  const printFeeText = formatCurrency(getFeeValue('printFee', PRICING_DEFAULTS.printFee), appConfig.currency);
-  const emailFeeText = formatCurrency(getFeeValue('emailFee', PRICING_DEFAULTS.emailFee), appConfig.currency);
-  const multiFeeText = formatCurrency(getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee), appConfig.currency);
-
-  if (!appConfig.price) {
-    priceInfo.textContent = `Today only: Free photo session! Add-ons: prints ${printFeeText} each, emails ${emailFeeText} each, multi-background add-on ${multiFeeText}.`;
-    headerPrice.textContent = 'Free Event';
-  } else {
-    priceInfo.textContent = `Base package: ${baseFormatted}. Prints add ${printFeeText} each, emails add ${emailFeeText} each, multi-background add-on ${multiFeeText}.`;
-    headerPrice.textContent = `Starting at ${baseFormatted}`;
   }
 
   updatePricingDisplay();
@@ -949,12 +946,35 @@ function updatePricingDisplay() {
     }
   }
 
-  const priceInfo = document.getElementById('price-info');
-  if (priceInfo) {
-    const priceMessage = appConfig.price
-      ? `Base package: ${formatCurrency(details.basePrice, details.currency)}. Prints add ${formatCurrency(details.perPrintFee, details.currency)} each, emails add ${formatCurrency(details.perEmailFee, details.currency)} each, multi-background add-on ${formatCurrency(details.multiBackgroundFee, details.currency)}.`
-      : `Today only: Free photo session! Add-ons: prints ${formatCurrency(details.perPrintFee, details.currency)} each, emails ${formatCurrency(details.perEmailFee, details.currency)} each, multi-background add-on ${formatCurrency(details.multiBackgroundFee, details.currency)}.`;
-    priceInfo.textContent = priceMessage;
+  const welcomeBasePrice = document.getElementById('welcome-base-price');
+  if (welcomeBasePrice) {
+    welcomeBasePrice.textContent = details.basePrice
+      ? `Base price ${formatCurrency(details.basePrice, details.currency)}`
+      : 'Included with your event';
+  }
+
+  const printsDetail = document.getElementById('welcome-option-prints');
+  if (printsDetail) {
+    const printsText = details.perPrintFee
+      ? `${formatCurrency(details.perPrintFee, details.currency)} per print`
+      : 'Complimentary prints included';
+    printsDetail.textContent = printsText;
+  }
+
+  const emailsDetail = document.getElementById('welcome-option-emails');
+  if (emailsDetail) {
+    const emailsText = details.perEmailFee
+      ? `${formatCurrency(details.perEmailFee, details.currency)} per email delivery`
+      : 'Unlimited email sharing included';
+    emailsDetail.textContent = emailsText;
+  }
+
+  const addonsDetail = document.getElementById('welcome-option-addons');
+  if (addonsDetail) {
+    const addOnText = details.multiBackgroundFee
+      ? `Extra scenes from ${formatCurrency(details.multiBackgroundFee, details.currency)}`
+      : 'Extra scenes included';
+    addonsDetail.textContent = addOnText;
   }
 
   const runningTotal = document.getElementById('running-total');
@@ -1112,6 +1132,7 @@ function updateProgress(targetId) {
   const totalSteps = progressScreens.length;
   const activeIndex = progressScreens.indexOf(targetId);
   const isReceipt = targetId === 'screen-receipt';
+  const highlightIndex = !isReceipt && activeIndex === -1 ? 0 : activeIndex;
 
   if (status) {
     if (activeIndex !== -1) {
@@ -1125,11 +1146,12 @@ function updateProgress(targetId) {
 
   steps.forEach(step => {
     const stepIndex = Number(step.dataset.index);
-    const isActive = stepIndex === activeIndex && !isReceipt;
+    const isActive = stepIndex === highlightIndex && !isReceipt;
     const isComplete = stepIndex < furthestProgressIndex || (isReceipt && stepIndex === furthestProgressIndex);
+    const shouldForceEnable = highlightIndex === stepIndex && activeIndex === -1 && !isReceipt;
     step.classList.toggle('is-active', isActive);
     step.classList.toggle('is-complete', isComplete && !isActive);
-    step.disabled = stepIndex > furthestProgressIndex;
+    step.disabled = shouldForceEnable ? false : stepIndex > furthestProgressIndex;
     step.setAttribute('aria-current', isActive ? 'step' : 'false');
   });
 }
