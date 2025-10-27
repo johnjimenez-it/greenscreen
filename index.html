@@ -39,16 +39,18 @@
     </section>
 
     <section id="screen-background" class="screen">
-      <h2>Select a Background</h2>
       <div class="background-layout">
         <div class="background-column">
           <div class="background-selection background-selection-card" aria-live="polite">
-            <div
-              id="background-tablist"
-              class="background-tabs"
-              role="tablist"
-              aria-label="Background categories"
-            ></div>
+            <div class="background-card-header">
+              <h2>Select a Background</h2>
+              <div
+                id="background-tablist"
+                class="background-tabs"
+                role="tablist"
+                aria-label="Background categories"
+              ></div>
+            </div>
             <div
               id="background-grid"
               class="background-grid background-thumb-grid"
@@ -57,11 +59,19 @@
               aria-label="Background choices"
             ></div>
           </div>
-          <div class="preview-card">
-            <h3>Preview</h3>
-            <div id="background-preview" class="background-preview" aria-live="polite">
-              <div class="preview-slot" data-slot="0">Choose a background</div>
-              <div class="preview-slot secondary" data-slot="1">Turn on Multi-Background to add another scene</div>
+          <div class="preview-row">
+            <div class="preview-card">
+              <h3>Preview</h3>
+              <div id="background-preview" class="background-preview" aria-live="polite">
+                <div class="preview-slot" data-slot="0">Choose a background</div>
+                <div class="preview-slot secondary" data-slot="1">Turn on Multi-Background to add another scene</div>
+              </div>
+              <p id="selected-background-name" class="selected-background-name">No background selected</p>
+            </div>
+            <div class="addon-card" aria-live="polite">
+              <h3>Need multiple backgrounds?</h3>
+              <p class="instruction" id="multi-background-note">Add a second background setup for an additional fee.</p>
+              <button class="secondary" id="multi-background-toggle" type="button" aria-pressed="false">Add Multi-Background Package (+$10)</button>
             </div>
             <p id="selected-background-name" class="selected-background-name">No background selected</p>
           </div>
