@@ -70,6 +70,42 @@
       flex-wrap: wrap;
       gap: 0.5rem;
     }
+    .auth-controls,
+    .filters {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .filters {
+      background: rgba(15, 23, 42, 0.45);
+      padding: 0.5rem 0.75rem;
+      border-radius: 12px;
+    }
+    .filters label {
+      font-size: 0.85rem;
+      color: #cbd5f5;
+    }
+    .filters input[type="date"] {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #f8fbff;
+      padding: 0.35rem 0.5rem;
+      border-radius: 8px;
+    }
+    .filters button {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 10px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .filters button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .details-btn {
       background: rgba(14, 165, 233, 0.25);
       color: #38bdf8;
@@ -205,10 +241,20 @@
   <main>
     <h2>Operator Panel</h2>
     <div class="meta">
-      <label for="pin">Enter Operator PIN</label>
-      <input type="password" id="pin" placeholder="Enter PIN" />
-      <button id="loginBtn" class="primary">Login</button>
-      <button id="exportCsv" class="secondary" style="display:none;">Export CSV</button>
+      <div class="auth-controls">
+        <label for="pin">Enter Operator PIN</label>
+        <input type="password" id="pin" placeholder="Enter PIN" />
+        <button id="loginBtn" class="primary">Login</button>
+        <button id="exportCsv" class="secondary" style="display:none;">Export CSV</button>
+      </div>
+      <div id="dateFilters" class="filters" style="display:none;">
+        <span>Filter by date:</span>
+        <label for="startDate">From</label>
+        <input type="date" id="startDate" name="startDate" />
+        <label for="endDate">To</label>
+        <input type="date" id="endDate" name="endDate" />
+        <button type="button" id="clearDateFilters" disabled>Clear</button>
+      </div>
     </div>
 
     <div id="dashboard" style="display:none;">
@@ -256,6 +302,10 @@
     const loginBtn = document.getElementById("loginBtn");
     const dashboard = document.getElementById("dashboard");
     const exportBtn = document.getElementById("exportCsv");
+    const dateFilters = document.getElementById("dateFilters");
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+    const clearDateFiltersBtn = document.getElementById("clearDateFilters");
     const modalBackdrop = document.getElementById("receiptModal");
     const modalCloseBtn = document.getElementById("modalClose");
     const modalTitle = document.getElementById("modalTitle");
@@ -281,11 +331,30 @@
       if (input === PIN) {
         dashboard.style.display = "block";
         exportBtn.style.display = "inline-flex";
+        if (dateFilters) {
+          dateFilters.style.display = "flex";
+          updateClearDateFiltersState();
+        }
         loadRecords();
       } else {
         alert("Invalid PIN");
       }
     });
+
+    [startDateInput, endDateInput].forEach((input) => {
+      if (!input) return;
+      input.addEventListener('input', () => {
+        applyFilters();
+      });
+    });
+
+    if (clearDateFiltersBtn) {
+      clearDateFiltersBtn.addEventListener('click', () => {
+        if (startDateInput) startDateInput.value = '';
+        if (endDateInput) endDateInput.value = '';
+        applyFilters();
+      });
+    }
 
     exportBtn.addEventListener("click", () => {
       const rows = Array.from(document.querySelectorAll('#recordsTable tbody tr'));
@@ -329,7 +398,7 @@
       }
       operatorMeta = loadOperatorMeta();
       recordsCache = mergeRecordsWithMeta(data);
-      renderRecords(recordsCache);
+      applyFilters();
     }
 
     function renderRecords(data) {
@@ -501,6 +570,69 @@
         saveNotesBtn.disabled = false;
       }, 1200);
     });
+
+    function applyFilters() {
+      const filtered = getFilteredRecords();
+      renderRecords(filtered);
+      updateClearDateFiltersState();
+    }
+
+    function getFilteredRecords() {
+      if (!Array.isArray(recordsCache) || recordsCache.length === 0) {
+        return [];
+      }
+      const startDate = parseDateInput(startDateInput ? startDateInput.value : '', 'start');
+      const endDate = parseDateInput(endDateInput ? endDateInput.value : '', 'end');
+      if (!startDate && !endDate) {
+        return [...recordsCache];
+      }
+      return recordsCache.filter((record) => recordMatchesDateRange(record, startDate, endDate));
+    }
+
+    function parseDateInput(value, bound) {
+      if (!value) return null;
+      const isoValue = bound === 'end' ? `${value}T23:59:59.999` : `${value}T00:00:00.000`;
+      const parsed = new Date(isoValue);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function recordMatchesDateRange(record, startDate, endDate) {
+      if (!startDate && !endDate) return true;
+      const recordDate = getRecordDate(record);
+      if (!recordDate) {
+        return false;
+      }
+      if (startDate && recordDate < startDate) {
+        return false;
+      }
+      if (endDate && recordDate > endDate) {
+        return false;
+      }
+      return true;
+    }
+
+    function getRecordDate(record) {
+      if (!record) return null;
+      if (record.createdAt) {
+        const created = new Date(record.createdAt);
+        if (!Number.isNaN(created.getTime())) {
+          return created;
+        }
+      }
+      if (record.date) {
+        const fromDate = new Date(record.date);
+        if (!Number.isNaN(fromDate.getTime())) {
+          return fromDate;
+        }
+      }
+      return null;
+    }
+
+    function updateClearDateFiltersState() {
+      if (!clearDateFiltersBtn) return;
+      const hasValue = Boolean((startDateInput && startDateInput.value) || (endDateInput && endDateInput.value));
+      clearDateFiltersBtn.disabled = !hasValue;
+    }
   </script>
 </body>
 </html>
