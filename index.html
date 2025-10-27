@@ -106,10 +106,10 @@
           <span>Party Name</span>
           <input id="party-name" type="text" maxlength="50" autocomplete="off" readonly />
         </label>
-        <label>
-          <span>How many people?</span>
-          <div class="touch-selector" id="people-count"></div>
-        </label>
+        <div class="party-size-field">
+          <span id="people-count-label" class="field-label">How many people?</span>
+          <div class="touch-selector" id="people-count" role="group" aria-labelledby="people-count-label"></div>
+        </div>
       </div>
       <div class="nav-buttons">
         <button class="secondary" data-prev>Back</button>

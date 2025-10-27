@@ -733,13 +733,11 @@ function getBackgroundLabel() {
 }
 
 function populateTouchSelectors() {
-  createTouchSelector(
+  initializePeopleStepper(
     document.getElementById('people-count'),
-    buildRange(1, 8),
-    value => `${value}`,
-    value => {
-      state.peopleCount = Number(value);
-    }
+    1,
+    10,
+    { labelId: 'people-count-label' }
   );
 
   createTouchSelector(
@@ -805,6 +803,80 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
     });
     container.appendChild(btn);
   });
+}
+
+function initializePeopleStepper(container, min, max, options = {}) {
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = '';
+
+  const stepper = document.createElement('div');
+  stepper.className = 'touch-stepper';
+  const { labelId } = options;
+  if (labelId) {
+    stepper.setAttribute('aria-labelledby', labelId);
+  }
+
+  const minusBtn = document.createElement('button');
+  minusBtn.type = 'button';
+  minusBtn.className = 'touch-stepper-button';
+  minusBtn.textContent = '−';
+  minusBtn.setAttribute('aria-label', 'Decrease number of people');
+
+  const valueDisplay = document.createElement('div');
+  valueDisplay.className = 'touch-stepper-value';
+  valueDisplay.setAttribute('role', 'status');
+  valueDisplay.setAttribute('aria-live', 'polite');
+  valueDisplay.setAttribute('aria-label', 'Selected number of people');
+
+  const plusBtn = document.createElement('button');
+  plusBtn.type = 'button';
+  plusBtn.className = 'touch-stepper-button';
+  plusBtn.textContent = '+';
+  plusBtn.setAttribute('aria-label', 'Increase number of people');
+
+  stepper.appendChild(minusBtn);
+  stepper.appendChild(valueDisplay);
+  stepper.appendChild(plusBtn);
+  container.appendChild(stepper);
+
+  let value = Number.isFinite(state.peopleCount) ? state.peopleCount : min;
+  value = Math.min(Math.max(value, min), max);
+  state.peopleCount = value;
+
+  function updateDisplay() {
+    valueDisplay.textContent = `${value}`;
+    minusBtn.disabled = value <= min;
+    const isAtMax = value >= max;
+    if (isAtMax) {
+      plusBtn.setAttribute('aria-disabled', 'true');
+    } else {
+      plusBtn.removeAttribute('aria-disabled');
+    }
+    plusBtn.classList.toggle('at-limit', isAtMax);
+  }
+
+  minusBtn.addEventListener('click', () => {
+    if (value > min) {
+      value -= 1;
+      state.peopleCount = value;
+      updateDisplay();
+    }
+  });
+
+  plusBtn.addEventListener('click', () => {
+    if (value >= max) {
+      alert(`You can have up to ${max} people in the photo.`);
+      return;
+    }
+    value += 1;
+    state.peopleCount = value;
+    updateDisplay();
+  });
+
+  updateDisplay();
 }
 
 function setupBackgroundAddons() {
@@ -1157,6 +1229,7 @@ function resetKiosk() {
   });
 
   furthestProgressIndex = -1;
+  populateTouchSelectors();
   document.querySelectorAll('#background-grid .background-option').forEach(btn => btn.classList.remove('selected'));
   updateBackgroundOptionSelectionClasses();
   updateBackgroundPreview();
