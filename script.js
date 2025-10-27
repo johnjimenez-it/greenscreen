@@ -1,6 +1,7 @@
 const screenOrder = [
   'screen-welcome',
   'screen-background',
+  'screen-background-preview',
   'screen-party',
   'screen-selfie',
   'screen-delivery',
@@ -11,6 +12,7 @@ const screenOrder = [
 
 const progressScreens = [
   'screen-background',
+  'screen-background-preview',
   'screen-party',
   'screen-selfie',
   'screen-delivery',
@@ -20,6 +22,7 @@ const progressScreens = [
 
 const progressLabels = {
   'screen-background': 'Background',
+  'screen-background-preview': 'Preview',
   'screen-party': 'Party',
   'screen-selfie': 'Selfie',
   'screen-delivery': 'Delivery',
