@@ -39,35 +39,39 @@
     </section>
 
     <section id="screen-background" class="screen">
-      <h2>Select a Background</h2>
       <div class="background-layout">
         <div class="background-column">
-          <div class="addon-card" aria-live="polite">
-            <h3>Need multiple backgrounds?</h3>
-            <p class="instruction" id="multi-background-note">Add a second background setup for an additional fee.</p>
-            <button class="secondary" id="multi-background-toggle" type="button" aria-pressed="false">Add Multi-Background Package (+$10)</button>
-          </div>
-          <div class="background-selection">
-            <div id="background-category-view" class="category-view" aria-live="polite">
-              <h3 class="background-subtitle">Choose a category</h3>
-              <div id="background-category-grid" class="background-grid category-grid" role="group" aria-label="Background categories"></div>
+          <div class="background-selection background-selection-card" aria-live="polite">
+            <div class="background-card-header">
+              <h2>Select a Background</h2>
+              <div
+                id="background-tablist"
+                class="background-tabs"
+                role="tablist"
+                aria-label="Background categories"
+              ></div>
             </div>
-            <div id="background-options-view" class="hidden" aria-live="polite">
-              <div class="background-options-header">
-                <button class="link-button" id="background-category-back" type="button">&#8592; All categories</button>
-                <div class="background-options-title">
-                  <h3 id="background-category-title">Backgrounds</h3>
-                  <p id="background-category-description" class="background-category-description hidden"></p>
-                </div>
+            <div
+              id="background-grid"
+              class="background-grid background-thumb-grid"
+              role="group"
+              aria-live="polite"
+              aria-label="Background choices"
+            ></div>
+          </div>
+          <div class="preview-row">
+            <div class="preview-card">
+              <h3>Preview</h3>
+              <div id="background-preview" class="background-preview" aria-live="polite">
+                <div class="preview-slot" data-slot="0">Choose a background</div>
+                <div class="preview-slot secondary" data-slot="1">Turn on Multi-Background to add another scene</div>
               </div>
-              <div id="background-grid" class="background-grid" role="group" aria-label="Background choices"></div>
+              <p id="selected-background-name" class="selected-background-name">No background selected</p>
             </div>
-          </div>
-          <div class="preview-card">
-            <h3>Preview</h3>
-            <div id="background-preview" class="background-preview" aria-live="polite">
-              <div class="preview-slot" data-slot="0">Choose a background</div>
-              <div class="preview-slot secondary" data-slot="1">Turn on Multi-Background to add another scene</div>
+            <div class="addon-card" aria-live="polite">
+              <h3>Need multiple backgrounds?</h3>
+              <p class="instruction" id="multi-background-note">Add a second background setup for an additional fee.</p>
+              <button class="secondary" id="multi-background-toggle" type="button" aria-pressed="false">Add Multi-Background Package (+$10)</button>
             </div>
           </div>
         </div>
@@ -173,14 +177,6 @@
   <template id="background-option-template">
     <button class="background-option">
       <span class="label"></span>
-    </button>
-  </template>
-
-  <template id="background-category-template">
-    <button class="category-option">
-      <span class="category-title"></span>
-      <span class="category-count"></span>
-      <span class="category-description"></span>
     </button>
   </template>
 
