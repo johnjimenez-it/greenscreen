@@ -741,19 +741,13 @@ function getBackgroundLabel() {
 }
 
 function populateTouchSelectors() {
-  initializePeopleStepper(
-    document.getElementById('people-count'),
-    1,
-    10,
-    { labelId: 'people-count-label' }
-  );
+  initializePeopleStepper(document.getElementById('peopleCount'), 1, 10);
 
   initializeSceneStepper(
-    document.getElementById('scene-count'),
+    document.getElementById('sceneCount'),
     SCENE_MIN,
     SCENE_MAX,
     {
-      labelId: 'scene-count-label',
       helperId: 'scene-count-helper'
     }
   );
@@ -823,42 +817,28 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
   });
 }
 
-function initializePeopleStepper(container, min, max, options = {}) {
-  if (!container) {
+function initializePeopleStepper(valueDisplay, min, max) {
+  if (!valueDisplay) {
     return;
   }
 
-  container.innerHTML = '';
-
-  const stepper = document.createElement('div');
-  stepper.className = 'touch-stepper';
-  const { labelId } = options;
-  if (labelId) {
-    stepper.setAttribute('aria-labelledby', labelId);
+  const stepper = valueDisplay.closest('.stepper');
+  if (!stepper) {
+    return;
   }
 
-  const minusBtn = document.createElement('button');
-  minusBtn.type = 'button';
-  minusBtn.className = 'touch-stepper-button';
-  minusBtn.textContent = '−';
-  minusBtn.setAttribute('aria-label', 'Decrease number of people');
+  const minusBtn = stepper.querySelector('.minus');
+  const plusBtn = stepper.querySelector('.plus');
 
-  const valueDisplay = document.createElement('div');
-  valueDisplay.className = 'touch-stepper-value';
-  valueDisplay.setAttribute('role', 'status');
-  valueDisplay.setAttribute('aria-live', 'polite');
-  valueDisplay.setAttribute('aria-label', 'Selected number of people');
+  if (!minusBtn || !plusBtn) {
+    return;
+  }
 
-  const plusBtn = document.createElement('button');
-  plusBtn.type = 'button';
-  plusBtn.className = 'touch-stepper-button';
-  plusBtn.textContent = '+';
-  plusBtn.setAttribute('aria-label', 'Increase number of people');
-
-  stepper.appendChild(minusBtn);
-  stepper.appendChild(valueDisplay);
-  stepper.appendChild(plusBtn);
-  container.appendChild(stepper);
+  [minusBtn, plusBtn].forEach(btn => {
+    if (!btn.hasAttribute('type')) {
+      btn.type = 'button';
+    }
+  });
 
   let value = Number.isFinite(state.peopleCount) ? state.peopleCount : min;
   value = Math.min(Math.max(value, min), max);
@@ -897,45 +877,30 @@ function initializePeopleStepper(container, min, max, options = {}) {
   updateDisplay();
 }
 
-function initializeSceneStepper(container, min = SCENE_MIN, max = SCENE_MAX, options = {}) {
-  if (!container) {
+function initializeSceneStepper(valueDisplay, min = SCENE_MIN, max = SCENE_MAX, options = {}) {
+  if (!valueDisplay) {
     return;
   }
 
-  container.innerHTML = '';
-
-  const stepper = document.createElement('div');
-  stepper.className = 'touch-stepper';
-  const { labelId, helperId } = options;
-  if (labelId) {
-    stepper.setAttribute('aria-labelledby', labelId);
-  }
-  if (helperId) {
-    stepper.setAttribute('aria-describedby', helperId);
+  const stepper = valueDisplay.closest('.stepper');
+  if (!stepper) {
+    return;
   }
 
-  const minusBtn = document.createElement('button');
-  minusBtn.type = 'button';
-  minusBtn.className = 'touch-stepper-button';
-  minusBtn.textContent = '−';
-  minusBtn.setAttribute('aria-label', 'Decrease number of scenes');
+  const minusBtn = stepper.querySelector('.minus-scene');
+  const plusBtn = stepper.querySelector('.plus-scene');
 
-  const valueDisplay = document.createElement('div');
-  valueDisplay.className = 'touch-stepper-value';
-  valueDisplay.setAttribute('role', 'status');
-  valueDisplay.setAttribute('aria-live', 'polite');
-  valueDisplay.setAttribute('aria-label', 'Selected number of scenes');
+  if (!minusBtn || !plusBtn) {
+    return;
+  }
 
-  const plusBtn = document.createElement('button');
-  plusBtn.type = 'button';
-  plusBtn.className = 'touch-stepper-button';
-  plusBtn.textContent = '+';
-  plusBtn.setAttribute('aria-label', 'Increase number of scenes');
+  [minusBtn, plusBtn].forEach(btn => {
+    if (!btn.hasAttribute('type')) {
+      btn.type = 'button';
+    }
+  });
 
-  stepper.appendChild(minusBtn);
-  stepper.appendChild(valueDisplay);
-  stepper.appendChild(plusBtn);
-  container.appendChild(stepper);
+  const { helperId = null } = options;
 
   sceneStepperControls = {
     min,
@@ -943,8 +908,7 @@ function initializeSceneStepper(container, min = SCENE_MIN, max = SCENE_MAX, opt
     minusBtn,
     plusBtn,
     valueDisplay,
-    helperId,
-    stepper
+    helperId
   };
 
   ensureSceneCountIsValid();
