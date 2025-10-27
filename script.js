@@ -1478,6 +1478,17 @@ function updatePricingDisplay() {
     return;
   }
 
+  const priceSource = {
+    charges: details,
+    prints: details.prints,
+    emailCount: details.emails,
+    multipleBackgrounds: state.multipleBackgrounds,
+    sceneCount: details.sceneCount,
+    extraSceneCount: details.extraSceneCount,
+    includedScenes: details.includedScenes
+  };
+  const breakdownData = getPriceLineItems(priceSource);
+
   const headerPrice = document.getElementById('eventPrice');
   if (headerPrice) {
     if (details.basePrice) {
@@ -1497,49 +1508,40 @@ function updatePricingDisplay() {
   const runningTotal = document.getElementById('running-total');
   if (runningTotal) {
     const totalText = details.total > 0 ? formatCurrency(details.total, details.currency) : 'Free';
-    const breakdownParts = [];
-    if (details.basePrice > 0) {
-      breakdownParts.push(`Base package ${formatCurrency(details.basePrice, details.currency)}`);
+    if (breakdownData) {
+      const summaryParts = breakdownData.items.map(item => `${item.label} ${formatCurrency(item.amount, breakdownData.currency)}`);
+      runningTotal.innerHTML = `
+        <span class="running-total-heading">Current total</span>
+        <span class="running-total-amount">${totalText}</span>
+        <span class="running-total-breakdown">
+          <span class="running-total-breakdown-label">Price breakdown:</span>
+          <span class="running-total-breakdown-items">${summaryParts.join(' • ')}</span>
+        </span>
+      `;
+    } else {
+      runningTotal.textContent = `Current total: ${totalText}`;
     }
-    if (details.prints > 0) {
-      breakdownParts.push(`${details.prints} print${details.prints === 1 ? '' : 's'} ${formatCurrency(details.printCost, details.currency)}`);
-    }
-    if (details.emails > 0) {
-      breakdownParts.push(`${details.emails} email${details.emails === 1 ? '' : 's'} ${formatCurrency(details.emailCost, details.currency)}`);
-    }
-    if (details.sceneCost > 0) {
-      breakdownParts.push(`Extra scenes (${details.extraSceneCount}) ${formatCurrency(details.sceneCost, details.currency)}`);
-    }
-    if (state.multipleBackgrounds) {
-      breakdownParts.push(`Multi-background ${formatCurrency(details.multiBackgroundCost, details.currency)}`);
-    }
-    runningTotal.textContent = breakdownParts.length
-      ? `Current total: ${totalText} (${breakdownParts.join(' + ')})`
-      : `Current total: ${totalText}`;
   }
 
   const paymentNote = document.getElementById('payment-note');
   if (paymentNote) {
-    const extras = [];
-    extras.push(`Base package ${formatCurrency(details.basePrice, details.currency)}`);
-    if (details.prints > 0) {
-      extras.push(`${details.prints} print${details.prints === 1 ? '' : 's'} = ${formatCurrency(details.printCost, details.currency)}`);
+    if (breakdownData) {
+      const noteDetails = breakdownData.items.map(item => `${item.label}: ${item.detail}`);
+      paymentNote.textContent = `Total due: ${formatCurrency(details.total, breakdownData.currency)}. ${noteDetails.join(' • ')}`;
     } else {
-      extras.push(`${formatCurrency(details.perPrintFee, details.currency)} per print`);
+      paymentNote.textContent = `Total due: ${formatCurrency(details.total, details.currency)}`;
     }
-    if (details.emails > 0) {
-      extras.push(`${details.emails} email${details.emails === 1 ? '' : 's'} = ${formatCurrency(details.emailCost, details.currency)}`);
-    } else {
-      extras.push(`${formatCurrency(details.perEmailFee, details.currency)} per email`);
-    }
-    extras.push(details.sceneCost > 0
-      ? `${details.sceneCount} scene${details.sceneCount === 1 ? '' : 's'} (${details.extraSceneCount} extra) = ${formatCurrency(details.sceneCost, details.currency)}`
-      : `${details.sceneCount} scene${details.sceneCount === 1 ? '' : 's'} included`);
-    extras.push(state.multipleBackgrounds
-      ? `Multi-background add-on = ${formatCurrency(details.multiBackgroundCost, details.currency)}`
-      : `Add-on available for ${formatCurrency(details.multiBackgroundFee, details.currency)}`);
-    paymentNote.textContent = `Current total: ${formatCurrency(details.total, details.currency)}. ${extras.join(' • ')}`;
   }
+
+  const breakdownMarkup = breakdownData ? buildPriceBreakdownMarkupFromData(breakdownData) : '';
+  ['delivery-price-summary', 'payment-price-summary'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) {
+      return;
+    }
+    container.innerHTML = breakdownMarkup;
+    container.classList.toggle('has-breakdown', Boolean(breakdownMarkup));
+  });
 
   const reviewSummary = document.getElementById('review-summary');
   if (reviewSummary && reviewSummary.innerHTML.trim()) {
@@ -1550,42 +1552,77 @@ function updatePricingDisplay() {
 }
 
 function buildPriceBreakdownMarkup(source) {
-  if (!source || !source.charges) {
+  const breakdown = getPriceLineItems(source);
+  return buildPriceBreakdownMarkupFromData(breakdown);
+}
+
+function buildPriceBreakdownMarkupFromData(breakdown) {
+  if (!breakdown || !Array.isArray(breakdown.items)) {
     return '';
+  }
+  const lines = breakdown.items.map(item =>
+    priceBreakdownLine(item.label, item.amount, breakdown.currency, { detail: item.detail })
+  );
+  lines.push(priceBreakdownLine('Total', breakdown.total, breakdown.currency, { isTotal: true }));
+  return `<div class="price-breakdown"><p class="price-breakdown-label">Price breakdown:</p><ul>${lines.join('')}</ul></div>`;
+}
+
+function priceBreakdownLine(label, amount, currency, options = {}) {
+  const { detail = '', isTotal = false } = options;
+  const formattedAmount = formatCurrency(Number(amount || 0), currency);
+  const classNames = ['price-breakdown-line'];
+  if (isTotal) {
+    classNames.push('total');
+  }
+  const detailMarkup = detail ? ` <span class="price-breakdown-detail">${detail}</span>` : '';
+  return `<li class="${classNames.join(' ')}"><span class="price-breakdown-line-label">${label}${detailMarkup}</span><span class="price-breakdown-amount">${formattedAmount}</span></li>`;
+}
+
+function getPriceLineItems(source) {
+  if (!source || !source.charges) {
+    return null;
   }
   const { charges } = source;
   const currency = charges.currency || (appConfig && appConfig.currency) || 'USD';
-  const prints = Number(source.prints || 0);
-  const emails = Number(source.emailCount || 0);
-  const multiSelected = Boolean(source.multipleBackgrounds);
-  const sceneCount = Number(charges.sceneCount || source.sceneCount || 0);
-  const extraSceneCount = Number(charges.extraSceneCount || source.extraSceneCount || 0);
+  const prints = Number(source.prints ?? charges.prints ?? 0);
+  const emails = Number(source.emailCount ?? charges.emails ?? 0);
+  const sceneCount = Number(charges.sceneCount ?? source.sceneCount ?? 0);
+  const includedScenes = Number(charges.includedScenes ?? source.includedScenes ?? 0);
+  const extraSceneCount = Number(charges.extraSceneCount ?? source.extraSceneCount ?? 0);
+  const extraSceneFee = Number(charges.extraSceneFee ?? getFeeValue('extraSceneFee', PRICING_DEFAULTS.extraSceneFee));
+  const perPrintFee = Number(charges.perPrintFee ?? getFeeValue('printFee', PRICING_DEFAULTS.printFee));
+  const perEmailFee = Number(charges.perEmailFee ?? getFeeValue('emailFee', PRICING_DEFAULTS.emailFee));
+  const baseAmount = Number(charges.basePrice || 0);
+  const multiAmount = Number(charges.multiBackgroundCost || 0);
+  const multiFee = Number(charges.multiBackgroundFee ?? getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee));
+  const multiSelected = multiAmount > 0 || Boolean(source.multipleBackgrounds);
   const sceneCost = Number(charges.sceneCost || 0);
+  const printCost = Number(charges.printCost || 0);
+  const emailCost = Number(charges.emailCost || 0);
 
-  const lines = [
-    priceBreakdownLine('Base package', charges.basePrice, currency),
-    priceBreakdownLine(`Prints (${prints} × ${formatCurrency(charges.perPrintFee, currency)})`, charges.printCost, currency),
-    priceBreakdownLine(`Emails (${emails} × ${formatCurrency(charges.perEmailFee, currency)})`, charges.emailCost, currency),
-    priceBreakdownLine(
-      sceneCost > 0
-        ? `Scenes (${sceneCount} total, ${extraSceneCount} extra)`
-        : `Scenes (${sceneCount} included)`,
-      sceneCost,
-      currency
-    )
-  ];
+  const baseDetail = includedScenes > 0
+    ? `${includedScenes} scene${includedScenes === 1 ? '' : 's'} included`
+    : 'No scenes included';
+  const multiDetail = multiSelected
+    ? `Selected (${formatCurrency(multiFee, currency)})`
+    : `Not selected (${formatCurrency(multiFee, currency)})`;
+  const sceneDetail = extraSceneCount > 0
+    ? `${extraSceneCount} extra × ${formatCurrency(extraSceneFee, currency)}`
+    : '0 extra scenes';
+  const printDetail = `${prints} × ${formatCurrency(perPrintFee, currency)}`;
+  const emailDetail = `${emails} × ${formatCurrency(perEmailFee, currency)}`;
 
-  const multiLabel = multiSelected ? 'Multi-background add-on' : 'Multi-background add-on (not selected)';
-  const multiAmount = multiSelected ? charges.multiBackgroundCost : 0;
-  lines.push(priceBreakdownLine(multiLabel, multiAmount, currency));
-  lines.push(priceBreakdownLine('Total', charges.total, currency, true));
-
-  return `<div class="price-breakdown"><h4>Price Breakdown</h4><ul>${lines.join('')}</ul></div>`;
-}
-
-function priceBreakdownLine(label, amount, currency, isTotal = false) {
-  const formattedAmount = formatCurrency(Number(amount || 0), currency);
-  return `<li${isTotal ? ' class="total"' : ''}><span>${label}</span><span>${formattedAmount}</span></li>`;
+  return {
+    currency,
+    total: Number(charges.total || 0),
+    items: [
+      { key: 'base', label: 'Base', amount: baseAmount, detail: baseDetail },
+      { key: 'multi', label: 'Multi-background', amount: multiAmount, detail: multiDetail },
+      { key: 'scenes', label: 'Scenes (extra)', amount: sceneCost, detail: sceneDetail },
+      { key: 'prints', label: 'Prints (extra)', amount: printCost, detail: printDetail },
+      { key: 'emails', label: 'Emails (extra)', amount: emailCost, detail: emailDetail }
+    ]
+  };
 }
 
 function showConfirmModal() {

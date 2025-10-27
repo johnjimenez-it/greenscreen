@@ -380,6 +380,42 @@
       margin: 0;
     }
 
+    .modal-section .price-breakdown {
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding-top: 0.65rem;
+    }
+
+    .modal-section .price-breakdown-label {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .modal-section .price-breakdown-line {
+      color: var(--text-secondary);
+    }
+
+    .modal-section .price-breakdown-line.total {
+      border-top-color: rgba(148, 163, 184, 0.35);
+      color: var(--text-primary);
+    }
+
+    .modal-section .price-breakdown-detail {
+      color: rgba(203, 213, 225, 0.8);
+      font-weight: 500;
+    }
+
+    .modal-section .price-breakdown-amount {
+      color: var(--text-primary);
+    }
+
+    .price-breakdown-empty {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 720px) {
       main {
         padding: 2rem 1.25rem;
@@ -448,6 +484,10 @@
           <h4>Status Progress</h4>
           <ol id="modalProgress" class="modal-progress"></ol>
         </div>
+        <div class="modal-section" id="modalPricingSection">
+          <h4>Pricing</h4>
+          <div id="modalPricing"></div>
+        </div>
         <div class="modal-section notes-area">
           <h4>Notes</h4>
           <textarea id="modalNotes" placeholder="Add operator notes..."></textarea>
@@ -479,6 +519,8 @@
     const modalNotes = document.getElementById("modalNotes");
     const saveNotesBtn = document.getElementById("saveNotes");
     const selfiePreview = document.getElementById("selfiePreview");
+    const modalPricingSection = document.getElementById("modalPricingSection");
+    const modalPricing = document.getElementById("modalPricing");
 
     const dateFormatter = new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -493,6 +535,13 @@
       { label: 'Picked Up', key: 'pickedUp' },
       { label: 'Photo Taken', key: 'photoTaken' }
     ];
+
+    const PRICING_FALLBACKS = {
+      printFee: 5,
+      emailFee: 3,
+      multiBackgroundFee: 10,
+      extraSceneFee: 5
+    };
 
     let recordsCache = [];
     let operatorMeta = {};
@@ -648,6 +697,7 @@
       activeRecordId = recordId;
       modalTitle.textContent = record.name ? `${record.name} (${recordId})` : `Receipt ${recordId}`;
       renderModalProgress(record);
+      renderModalPricing(record);
       modalNotes.value = record.notes || '';
       renderSelfiePreview(record);
       modalBackdrop.classList.add('visible');
@@ -678,6 +728,95 @@
         selfiePreview.innerHTML = `<img src="${record.selfieData}" alt="Quick selfie for ${record.name || record.photoID || 'customer'}" />`;
       } else {
         selfiePreview.innerHTML = '<p>No selfie available for this receipt.</p>';
+      }
+    }
+
+    function renderModalPricing(record) {
+      if (!modalPricing || !modalPricingSection) {
+        return;
+      }
+      const breakdown = buildPricingBreakdownData(record);
+      if (!breakdown) {
+        modalPricing.innerHTML = '<p class="price-breakdown-empty">No pricing details recorded.</p>';
+        return;
+      }
+      modalPricing.innerHTML = buildPriceBreakdownMarkupFromData(breakdown);
+    }
+
+    function buildPricingBreakdownData(record) {
+      if (!record || !record.charges) {
+        return null;
+      }
+      const charges = record.charges;
+      const currency = charges.currency || 'USD';
+      const prints = Number(record.prints ?? charges.prints ?? 0);
+      const emails = Number(record.emailCount ?? charges.emails ?? 0);
+      const sceneCount = Number(charges.sceneCount ?? record.sceneCount ?? 0);
+      const includedScenes = Number(charges.includedScenes ?? record.includedScenes ?? 0);
+      const extraSceneCount = Number(charges.extraSceneCount ?? record.extraSceneCount ?? 0);
+      const extraSceneFee = Number(charges.extraSceneFee ?? PRICING_FALLBACKS.extraSceneFee);
+      const perPrintFee = Number(charges.perPrintFee ?? PRICING_FALLBACKS.printFee);
+      const perEmailFee = Number(charges.perEmailFee ?? PRICING_FALLBACKS.emailFee);
+      const baseAmount = Number(charges.basePrice || 0);
+      const multiAmount = Number(charges.multiBackgroundCost || 0);
+      const multiFee = Number(charges.multiBackgroundFee ?? PRICING_FALLBACKS.multiBackgroundFee);
+      const multiSelected = multiAmount > 0 || Boolean(record.multipleBackgrounds);
+      const sceneCost = Number(charges.sceneCost || 0);
+      const printCost = Number(charges.printCost || 0);
+      const emailCost = Number(charges.emailCost || 0);
+
+      const baseDetail = includedScenes > 0
+        ? `${includedScenes} scene${includedScenes === 1 ? '' : 's'} included`
+        : 'No scenes included';
+      const multiDetail = multiSelected
+        ? `Selected (${formatCurrencyLocal(multiFee, currency)})`
+        : `Not selected (${formatCurrencyLocal(multiFee, currency)})`;
+      const sceneDetail = extraSceneCount > 0
+        ? `${extraSceneCount} extra × ${formatCurrencyLocal(extraSceneFee, currency)}`
+        : '0 extra scenes';
+      const printDetail = `${prints} × ${formatCurrencyLocal(perPrintFee, currency)}`;
+      const emailDetail = `${emails} × ${formatCurrencyLocal(perEmailFee, currency)}`;
+
+      return {
+        currency,
+        total: Number(charges.total || 0),
+        items: [
+          { label: 'Base', amount: baseAmount, detail: baseDetail },
+          { label: 'Multi-background', amount: multiAmount, detail: multiDetail },
+          { label: 'Scenes (extra)', amount: sceneCost, detail: sceneDetail },
+          { label: 'Prints (extra)', amount: printCost, detail: printDetail },
+          { label: 'Emails (extra)', amount: emailCost, detail: emailDetail }
+        ]
+      };
+    }
+
+    function buildPriceBreakdownMarkupFromData(breakdown) {
+      if (!breakdown || !Array.isArray(breakdown.items)) {
+        return '';
+      }
+      const lines = breakdown.items.map(item =>
+        priceBreakdownLine(item.label, item.amount, breakdown.currency, { detail: item.detail })
+      );
+      lines.push(priceBreakdownLine('Total', breakdown.total, breakdown.currency, { isTotal: true }));
+      return `<div class="price-breakdown"><p class="price-breakdown-label">Price breakdown:</p><ul>${lines.join('')}</ul></div>`;
+    }
+
+    function priceBreakdownLine(label, amount, currency, options = {}) {
+      const { detail = '', isTotal = false } = options;
+      const formattedAmount = formatCurrencyLocal(Number(amount || 0), currency);
+      const classNames = ['price-breakdown-line'];
+      if (isTotal) {
+        classNames.push('total');
+      }
+      const detailMarkup = detail ? ` <span class="price-breakdown-detail">${detail}</span>` : '';
+      return `<li class="${classNames.join(' ')}"><span class="price-breakdown-line-label">${label}${detailMarkup}</span><span class="price-breakdown-amount">${formattedAmount}</span></li>`;
+    }
+
+    function formatCurrencyLocal(amount, currency) {
+      try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+      } catch (error) {
+        return `$${Number(amount || 0).toFixed(2)}`;
       }
     }
 
