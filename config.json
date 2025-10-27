@@ -9,25 +9,47 @@
   "deliveryMethods": ["Email", "Print Pickup", "Both"],
   "maxEmails": 5,
   "maxPrints": 10,
+  "backgroundCategories": [
+    {
+      "id": "fsu-spirit",
+      "name": "FSU Spirit",
+      "description": "Signature Florida State pride scenes and celebratory lighting."
+    },
+    {
+      "id": "nature",
+      "name": "Nature Escapes",
+      "description": "Forests, coasts, and outdoor vibes for a relaxed look."
+    },
+    {
+      "id": "city-retro",
+      "name": "City & Retro",
+      "description": "Neon nights, cosmic energy, and throwback grids."
+    },
+    {
+      "id": "classic",
+      "name": "Classic Showcase",
+      "description": "Timeless stages that keep the focus on your guests."
+    }
+  ],
   "backgrounds": [
-    { "id": "fsu-garnet", "name": "FSU Garnet Lights" },
-    { "id": "fsu-gold", "name": "Golden Chief Glow" },
-    { "id": "fsu-spear", "name": "Spear Strike" },
-    { "id": "fsu-campus", "name": "Westcott Fountain Nights" },
-    { "id": "fsu-stadium", "name": "Doak Campbell Lights" },
-    { "id": "fsu-warpath", "name": "Warpath Sunrise" },
-    { "id": "fsu-torch", "name": "Torchlight Traditions" },
-    { "id": "fsu-heritage", "name": "Heritage Hall Shine" },
-    { "id": "nature-forest", "name": "Canopy Forest" },
-    { "id": "nature-ocean", "name": "Emerald Coast" },
-    { "id": "nature-mountain", "name": "Smoky Mountain Mist" },
-    { "id": "nature-garden", "name": "Botanical Bloom" },
-    { "id": "retro-grid", "name": "Retro Grid Glow" },
-    { "id": "city-night", "name": "City Neon Nights" },
-    { "id": "neon", "name": "Neon City", "file": "neon.jpg" },
-    { "id": "cosmic", "name": "Cosmic Swirl", "file": "cosmic.jpg" },
-    { "id": "beach", "name": "Sunset Beach", "file": "beach.jpg" },
-    { "id": "stage", "name": "Classic Stage", "file": "stage.jpg" }
+    { "id": "fsu-garnet", "name": "FSU Garnet Lights", "categoryId": "fsu-spirit" },
+    { "id": "fsu-gold", "name": "Golden Chief Glow", "categoryId": "fsu-spirit" },
+    { "id": "fsu-spear", "name": "Spear Strike", "categoryId": "fsu-spirit" },
+    { "id": "fsu-campus", "name": "Westcott Fountain Nights", "categoryId": "fsu-spirit" },
+    { "id": "fsu-stadium", "name": "Doak Campbell Lights", "categoryId": "fsu-spirit" },
+    { "id": "fsu-warpath", "name": "Warpath Sunrise", "categoryId": "fsu-spirit" },
+    { "id": "fsu-torch", "name": "Torchlight Traditions", "categoryId": "fsu-spirit" },
+    { "id": "fsu-heritage", "name": "Heritage Hall Shine", "categoryId": "fsu-spirit" },
+    { "id": "nature-forest", "name": "Canopy Forest", "categoryId": "nature" },
+    { "id": "nature-ocean", "name": "Emerald Coast", "categoryId": "nature" },
+    { "id": "nature-mountain", "name": "Smoky Mountain Mist", "categoryId": "nature" },
+    { "id": "nature-garden", "name": "Botanical Bloom", "categoryId": "nature" },
+    { "id": "beach", "name": "Sunset Beach", "categoryId": "nature", "file": "beach.jpg" },
+    { "id": "retro-grid", "name": "Retro Grid Glow", "categoryId": "city-retro" },
+    { "id": "city-night", "name": "City Neon Nights", "categoryId": "city-retro" },
+    { "id": "neon", "name": "Neon City", "categoryId": "city-retro", "file": "neon.jpg" },
+    { "id": "cosmic", "name": "Cosmic Swirl", "categoryId": "city-retro", "file": "cosmic.jpg" },
+    { "id": "stage", "name": "Classic Stage", "categoryId": "classic", "file": "stage.jpg" }
   ],
   "hotline": "1-800-555-4757",
   "supportEmail": "support@greenscreenexpress.com"

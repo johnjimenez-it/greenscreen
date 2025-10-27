@@ -498,6 +498,111 @@ body.welcome-active .welcome-info {
   gap: 1rem;
 }
 
+.background-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.background-subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.category-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.category-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 1.35rem;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 3px solid transparent;
+  box-shadow: 0 14px 28px rgba(17, 36, 51, 0.12);
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  color: inherit;
+  font-size: 1rem;
+}
+
+.category-option:hover,
+.category-option:focus {
+  transform: translateY(-4px);
+  border-color: var(--secondary);
+  box-shadow: 0 18px 36px rgba(17, 36, 51, 0.16);
+  outline: none;
+}
+
+.category-option.contains-selection {
+  border-color: var(--secondary);
+  box-shadow: 0 18px 36px rgba(17, 36, 51, 0.2);
+}
+
+.category-option .category-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.category-option .category-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.category-option .category-description {
+  font-size: 0.95rem;
+  color: #446177;
+  line-height: 1.4;
+}
+
+.background-options-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.background-options-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.background-options-title h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.background-category-description {
+  margin: 0;
+  font-size: 1rem;
+  color: #446177;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.link-button:hover,
+.link-button:focus {
+  text-decoration: underline;
+  outline: none;
+}
+
 .background-layout {
   display: flex;
   gap: 2rem;
