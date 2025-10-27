@@ -100,6 +100,8 @@ function showScreen(targetId) {
     }
   });
 
+  document.body.classList.toggle('welcome-active', targetId === 'screen-welcome');
+
   const progressIndex = progressScreens.indexOf(targetId);
   if (progressIndex !== -1) {
     furthestProgressIndex = Math.max(furthestProgressIndex, progressIndex);
