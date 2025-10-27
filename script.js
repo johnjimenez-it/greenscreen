@@ -57,6 +57,7 @@ let selfieStream = null;
 let appConfig = null;
 let pendingReceipt = null;
 let furthestProgressIndex = -1;
+let welcomeTapFeedbackTimeout = null;
 
 const backgroundGradients = {
   'fsu-garnet': 'linear-gradient(135deg, #782F40, #9b4a54 55%, #CEB888)',
@@ -268,13 +269,78 @@ function init() {
       resetIdleTimer();
     });
   }
-  updateProgress('screen-welcome');
+  showScreen('screen-welcome');
 }
 
 function setupNavigation() {
-  document.getElementById('start-btn').addEventListener('click', () => showScreen('screen-background'));
+  setupWelcomeScreenTap();
   document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', goToNextScreen));
   document.querySelectorAll('[data-prev]').forEach(btn => btn.addEventListener('click', goToPreviousScreen));
+}
+
+function setupWelcomeScreenTap() {
+  const welcomeScreen = document.getElementById('screen-welcome');
+  if (!welcomeScreen) {
+    return;
+  }
+
+  const welcomeCard = document.getElementById('welcome-card');
+
+  const triggerTapFeedback = () => {
+    if (!welcomeCard) {
+      return;
+    }
+    welcomeCard.classList.add('is-tapping');
+    if (welcomeTapFeedbackTimeout) {
+      clearTimeout(welcomeTapFeedbackTimeout);
+    }
+    welcomeTapFeedbackTimeout = window.setTimeout(() => {
+      welcomeCard.classList.remove('is-tapping');
+      welcomeTapFeedbackTimeout = null;
+    }, 220);
+  };
+
+  const showRipple = event => {
+    if (!event || !welcomeScreen) {
+      return;
+    }
+    const ripple = document.createElement('span');
+    ripple.className = 'tap-ripple';
+    const rect = welcomeScreen.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+    welcomeScreen.appendChild(ripple);
+    ripple.addEventListener('animationend', () => {
+      ripple.remove();
+    });
+  };
+
+  const proceedToNext = () => {
+    showScreen('screen-background');
+  };
+
+  welcomeScreen.addEventListener('pointerdown', event => {
+    if (event && event.isPrimary === false) {
+      return;
+    }
+    triggerTapFeedback();
+    showRipple(event);
+  });
+
+  welcomeScreen.addEventListener('click', () => {
+    proceedToNext();
+  });
+
+  welcomeScreen.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      triggerTapFeedback();
+      proceedToNext();
+    }
+  });
 }
 
 function setupBackgroundCategoryNavigation() {
@@ -302,9 +368,9 @@ function populateEventInfo() {
 
   const taglineText = typeof appConfig.tagline === 'string' ? appConfig.tagline.trim() : '';
 
-  const welcomeInstructions = document.getElementById('welcome-instructions');
-  if (welcomeInstructions) {
-    welcomeInstructions.textContent = taglineText || 'Follow the prompts to build your photo package in just a few taps.';
+  const welcomeTagline = document.getElementById('welcome-tagline');
+  if (welcomeTagline) {
+    welcomeTagline.textContent = taglineText || 'Step into the spotlight';
   }
 
   const eventTagline = document.getElementById('eventTagline');
@@ -1102,7 +1168,6 @@ function resetKiosk() {
   populateBackgrounds();
   reflectMultiBackgroundState();
   updatePricingDisplay();
-  updateProgress('screen-welcome');
   showScreen('screen-welcome');
 }
 
@@ -1192,35 +1257,11 @@ function updatePricingDisplay() {
     }
   }
 
-  const welcomeBasePrice = document.getElementById('welcome-base-price');
-  if (welcomeBasePrice) {
-    welcomeBasePrice.textContent = details.basePrice
-      ? `Base price ${formatCurrency(details.basePrice, details.currency)}`
-      : 'Included with your event';
-  }
-
-  const printsDetail = document.getElementById('welcome-option-prints');
-  if (printsDetail) {
-    const printsText = details.perPrintFee
-      ? `${formatCurrency(details.perPrintFee, details.currency)} per print`
-      : 'Complimentary prints included';
-    printsDetail.textContent = printsText;
-  }
-
-  const emailsDetail = document.getElementById('welcome-option-emails');
-  if (emailsDetail) {
-    const emailsText = details.perEmailFee
-      ? `${formatCurrency(details.perEmailFee, details.currency)} per email delivery`
-      : 'Unlimited email sharing included';
-    emailsDetail.textContent = emailsText;
-  }
-
-  const addonsDetail = document.getElementById('welcome-option-addons');
-  if (addonsDetail) {
-    const addOnText = details.multiBackgroundFee
-      ? `Extra scenes from ${formatCurrency(details.multiBackgroundFee, details.currency)}`
-      : 'Extra scenes included';
-    addonsDetail.textContent = addOnText;
+  const welcomePrice = document.getElementById('welcome-price');
+  if (welcomePrice) {
+    welcomePrice.textContent = details.basePrice
+      ? `Starting at ${formatCurrency(details.basePrice, details.currency)}`
+      : 'Free';
   }
 
   const runningTotal = document.getElementById('running-total');
