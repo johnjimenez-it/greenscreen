@@ -37,6 +37,7 @@ const state = {
   selectedBackgroundCategory: null,
   partyName: '',
   peopleCount: null,
+  sceneCount: null,
   deliveryMethod: null,
   prints: 0,
   emailCount: 0,
@@ -49,8 +50,12 @@ const state = {
 const PRICING_DEFAULTS = {
   printFee: 5,
   emailFee: 3,
-  multiBackgroundFee: 10
+  multiBackgroundFee: 10,
+  extraSceneFee: 5
 };
+
+const SCENE_MIN = 1;
+const SCENE_MAX = 8;
 
 let currentScreenIndex = 0;
 let currentKeyboardInput = null;
@@ -60,6 +65,7 @@ let appConfig = null;
 let pendingReceipt = null;
 let furthestProgressIndex = -1;
 let welcomeTapFeedbackTimeout = null;
+let sceneStepperControls = null;
 
 const backgroundGradients = {
   'fsu-garnet': 'linear-gradient(135deg, #782F40, #9b4a54 55%, #CEB888)',
@@ -639,6 +645,8 @@ function selectBackground(background, optionId) {
 
   updateBackgroundOptionSelectionClasses();
   updateBackgroundPreview();
+  syncSceneSelectionWithBackgrounds();
+  updatePricingDisplay();
 }
 
 function updateBackgroundOptionSelectionClasses() {
@@ -738,6 +746,17 @@ function populateTouchSelectors() {
     1,
     10,
     { labelId: 'people-count-label' }
+  );
+
+  initializeSceneStepper(
+    document.getElementById('scene-count'),
+    SCENE_MIN,
+    SCENE_MAX,
+    {
+      labelId: 'scene-count-label',
+      helperId: 'scene-count-helper',
+      noteId: 'scene-included-note'
+    }
   );
 
   createTouchSelector(
@@ -879,6 +898,163 @@ function initializePeopleStepper(container, min, max, options = {}) {
   updateDisplay();
 }
 
+function initializeSceneStepper(container, min = SCENE_MIN, max = SCENE_MAX, options = {}) {
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = '';
+
+  const stepper = document.createElement('div');
+  stepper.className = 'touch-stepper';
+  const { labelId, helperId, noteId } = options;
+  if (labelId) {
+    stepper.setAttribute('aria-labelledby', labelId);
+  }
+  if (helperId) {
+    stepper.setAttribute('aria-describedby', helperId);
+  }
+
+  const minusBtn = document.createElement('button');
+  minusBtn.type = 'button';
+  minusBtn.className = 'touch-stepper-button';
+  minusBtn.textContent = '−';
+  minusBtn.setAttribute('aria-label', 'Decrease number of scenes');
+
+  const valueDisplay = document.createElement('div');
+  valueDisplay.className = 'touch-stepper-value';
+  valueDisplay.setAttribute('role', 'status');
+  valueDisplay.setAttribute('aria-live', 'polite');
+  valueDisplay.setAttribute('aria-label', 'Selected number of scenes');
+
+  const plusBtn = document.createElement('button');
+  plusBtn.type = 'button';
+  plusBtn.className = 'touch-stepper-button';
+  plusBtn.textContent = '+';
+  plusBtn.setAttribute('aria-label', 'Increase number of scenes');
+
+  stepper.appendChild(minusBtn);
+  stepper.appendChild(valueDisplay);
+  stepper.appendChild(plusBtn);
+  container.appendChild(stepper);
+
+  sceneStepperControls = {
+    min,
+    max,
+    minusBtn,
+    plusBtn,
+    valueDisplay,
+    helperId,
+    noteId,
+    stepper
+  };
+
+  ensureSceneCountIsValid();
+  updateSceneStepperDisplay();
+
+  minusBtn.addEventListener('click', () => {
+    const included = getIncludedSceneCount();
+    const nextValue = Math.max(state.sceneCount - 1, Math.max(min, included));
+    if (nextValue === state.sceneCount) {
+      return;
+    }
+    state.sceneCount = nextValue;
+    updateSceneStepperDisplay();
+    updatePricingDisplay();
+  });
+
+  plusBtn.addEventListener('click', () => {
+    if (state.sceneCount >= max) {
+      alert(`You can schedule up to ${max} scenes.`);
+      return;
+    }
+    state.sceneCount = Math.min(state.sceneCount + 1, max);
+    updateSceneStepperDisplay();
+    updatePricingDisplay();
+  });
+}
+
+function getIncludedSceneCount() {
+  const selections = getSelectedBackgrounds();
+  return selections.length;
+}
+
+function clampSceneCount(value) {
+  const included = getIncludedSceneCount();
+  const min = sceneStepperControls ? sceneStepperControls.min : SCENE_MIN;
+  const max = sceneStepperControls ? sceneStepperControls.max : SCENE_MAX;
+  let nextValue = Number.isFinite(value) ? value : Math.max(included, min);
+  nextValue = Math.max(nextValue, min);
+  nextValue = Math.max(nextValue, included);
+  nextValue = Math.min(nextValue, max);
+  return nextValue;
+}
+
+function ensureSceneCountIsValid() {
+  const clamped = clampSceneCount(state.sceneCount);
+  if (state.sceneCount !== clamped) {
+    state.sceneCount = clamped;
+  }
+  return clamped;
+}
+
+function updateSceneStepperDisplay() {
+  if (!sceneStepperControls) {
+    return;
+  }
+  const { min, max, minusBtn, plusBtn, valueDisplay, helperId, noteId } = sceneStepperControls;
+  const sceneValue = ensureSceneCountIsValid();
+  const included = getIncludedSceneCount();
+
+  valueDisplay.textContent = `${sceneValue}`;
+  const disableMinus = sceneValue <= min || sceneValue <= included;
+  minusBtn.disabled = disableMinus;
+
+  const atMax = sceneValue >= max;
+  if (atMax) {
+    plusBtn.setAttribute('aria-disabled', 'true');
+  } else {
+    plusBtn.removeAttribute('aria-disabled');
+  }
+  plusBtn.classList.toggle('at-limit', atMax);
+
+  if (helperId) {
+    const helper = document.getElementById(helperId);
+    if (helper) {
+      helper.dataset.included = `${included}`;
+    }
+  }
+
+  if (noteId) {
+    const note = document.getElementById(noteId);
+    if (note) {
+      note.textContent = included > 0
+        ? `Included with backgrounds: ${included}`
+        : '';
+    }
+  }
+}
+
+function syncSceneSelectionWithBackgrounds() {
+  ensureSceneCountIsValid();
+  updateSceneStepperDisplay();
+}
+
+function getScenePricingInfo() {
+  const sceneCount = ensureSceneCountIsValid();
+  const includedScenes = getIncludedSceneCount();
+  const extraSceneFee = getFeeValue('extraSceneFee', PRICING_DEFAULTS.extraSceneFee);
+  const extraSceneCount = Math.max(sceneCount - includedScenes, 0);
+  const sceneCost = extraSceneCount * extraSceneFee;
+  return {
+    sceneCount,
+    includedScenes,
+    extraSceneCount,
+    extraSceneFee,
+    sceneCost
+  };
+}
+
 function setupBackgroundAddons() {
   const toggle = document.getElementById('multi-background-toggle');
   if (!toggle) {
@@ -894,6 +1070,7 @@ function setupBackgroundAddons() {
       state.backgroundSelections = state.backgroundSelections.slice(0, 1);
       state.background = state.backgroundSelections[0] || null;
     }
+    syncSceneSelectionWithBackgrounds();
     updatePricingDisplay();
   });
   reflectMultiBackgroundState();
@@ -918,6 +1095,7 @@ function reflectMultiBackgroundState() {
       ? 'Select two backgrounds to capture multiple scenes during your session.'
       : 'Add a second background setup for an additional fee.';
   }
+  syncSceneSelectionWithBackgrounds();
   updateBackgroundOptionSelectionClasses();
   updateBackgroundPreview();
 }
@@ -1092,13 +1270,16 @@ function generateSummaryHTML() {
     charges: priceDetails,
     prints: state.prints,
     emailCount: state.emailCount,
-    multipleBackgrounds: state.multipleBackgrounds
+    multipleBackgrounds: state.multipleBackgrounds,
+    sceneCount: state.sceneCount,
+    extraSceneCount: priceDetails ? priceDetails.extraSceneCount : Math.max((state.sceneCount || 0) - getIncludedSceneCount(), 0)
   };
   return `
     <h3>You're all set!</h3>
     <p><strong>Party:</strong> ${state.partyName}</p>
     <p><strong>${getBackgroundLabel()}:</strong> ${getBackgroundSummaryText()}</p>
     <p><strong>People in photo:</strong> ${state.peopleCount}</p>
+    <p><strong>Scenes:</strong> ${state.sceneCount}</p>
     <p><strong>Delivery:</strong> ${state.deliveryMethod}</p>
     <p><strong>Prints:</strong> ${state.prints}</p>
     <p><strong>Email count:</strong> ${state.emailCount}</p>
@@ -1144,6 +1325,9 @@ function capturePendingReceipt() {
     hotline: appConfig.hotline,
     supportEmail: appConfig.supportEmail,
     peopleCount: state.peopleCount,
+    sceneCount: state.sceneCount,
+    includedScenes: priceDetails ? priceDetails.includedScenes : getIncludedSceneCount(),
+    extraSceneCount: priceDetails ? priceDetails.extraSceneCount : Math.max((state.sceneCount || 0) - getIncludedSceneCount(), 0),
     multipleBackgrounds: state.multipleBackgrounds
   };
 }
@@ -1157,6 +1341,12 @@ function renderReceipt() {
   const backgroundCount = Array.isArray(pendingReceipt.backgroundSelections) ? pendingReceipt.backgroundSelections.length : 0;
   const backgroundLabel = backgroundCount > 1 ? 'Backgrounds' : 'Background';
   const backgroundIdLabel = backgroundCount > 1 ? 'Background IDs' : 'Background ID';
+  const sceneCount = Number(pendingReceipt.sceneCount || 0);
+  const includedScenes = Number(pendingReceipt.includedScenes || 0);
+  const extraSceneCount = Number(pendingReceipt.extraSceneCount || 0);
+  const sceneDisplay = extraSceneCount > 0
+    ? `${sceneCount} (includes ${includedScenes}, +${extraSceneCount} extra)`
+    : `${sceneCount} (included with backgrounds)`;
 
   receipt.innerHTML = `
     <section class="receipt-section">
@@ -1170,6 +1360,7 @@ function renderReceipt() {
       <p><strong>Delivery:</strong> ${pendingReceipt.deliveryMethod}</p>
       <p><strong>Payment Method:</strong> ${pendingReceipt.paymentMethod}</p>
       <p><strong>Total:</strong> ${pendingReceipt.total}</p>
+      <p><strong>Scenes:</strong> ${sceneDisplay}</p>
       <p><strong>Multi-background add-on:</strong> ${multiBackgroundText}</p>
       ${breakdownMarkup}
       <p><strong>Photo ID:</strong> ${pendingReceipt.photoID}</p>
@@ -1192,6 +1383,7 @@ function renderReceipt() {
       <p><strong>Date:</strong> ${pendingReceipt.date}</p>
       <p><strong>Time:</strong> ${pendingReceipt.time}</p>
       <p><strong>People:</strong> ${pendingReceipt.peopleCount}</p>
+      <p><strong>Scenes:</strong> ${sceneDisplay}</p>
       <p><strong>${backgroundLabel}:</strong> ${pendingReceipt.background}</p>
       <p><strong>${backgroundIdLabel}:</strong> ${pendingReceipt.backgroundId}</p>
       <p><strong>Emails:</strong></p>
@@ -1219,6 +1411,7 @@ function resetKiosk() {
     selectedBackgroundCategory: null,
     partyName: '',
     peopleCount: null,
+    sceneCount: null,
     deliveryMethod: null,
     prints: 0,
     emailCount: 0,
@@ -1288,6 +1481,7 @@ function calculatePriceDetails() {
   const perPrintFee = getFeeValue('printFee', PRICING_DEFAULTS.printFee);
   const perEmailFee = getFeeValue('emailFee', PRICING_DEFAULTS.emailFee);
   const multiBackgroundFee = getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee);
+  const sceneInfo = getScenePricingInfo();
 
   const prints = Math.max(Number(state.prints || 0), 0);
   const emails = Math.max(Number(state.emailCount || 0), 0);
@@ -1295,7 +1489,8 @@ function calculatePriceDetails() {
   const printCost = prints * perPrintFee;
   const emailCost = emails * perEmailFee;
   const multiBackgroundCost = state.multipleBackgrounds ? multiBackgroundFee : 0;
-  const total = basePrice + printCost + emailCost + multiBackgroundCost;
+  const sceneCost = sceneInfo.sceneCost;
+  const total = basePrice + printCost + emailCost + multiBackgroundCost + sceneCost;
 
   return {
     currency,
@@ -1303,11 +1498,16 @@ function calculatePriceDetails() {
     perPrintFee,
     perEmailFee,
     multiBackgroundFee,
+    extraSceneFee: sceneInfo.extraSceneFee,
     prints,
     emails,
     printCost,
     emailCost,
     multiBackgroundCost,
+    sceneCount: sceneInfo.sceneCount,
+    includedScenes: sceneInfo.includedScenes,
+    extraSceneCount: sceneInfo.extraSceneCount,
+    sceneCost,
     total
   };
 }
@@ -1350,6 +1550,9 @@ function updatePricingDisplay() {
     if (details.emails > 0) {
       breakdownParts.push(`${details.emails} email${details.emails === 1 ? '' : 's'} ${formatCurrency(details.emailCost, details.currency)}`);
     }
+    if (details.sceneCost > 0) {
+      breakdownParts.push(`Extra scenes (${details.extraSceneCount}) ${formatCurrency(details.sceneCost, details.currency)}`);
+    }
     if (state.multipleBackgrounds) {
       breakdownParts.push(`Multi-background ${formatCurrency(details.multiBackgroundCost, details.currency)}`);
     }
@@ -1372,6 +1575,9 @@ function updatePricingDisplay() {
     } else {
       extras.push(`${formatCurrency(details.perEmailFee, details.currency)} per email`);
     }
+    extras.push(details.sceneCost > 0
+      ? `${details.sceneCount} scene${details.sceneCount === 1 ? '' : 's'} (${details.extraSceneCount} extra) = ${formatCurrency(details.sceneCost, details.currency)}`
+      : `${details.sceneCount} scene${details.sceneCount === 1 ? '' : 's'} included`);
     extras.push(state.multipleBackgrounds
       ? `Multi-background add-on = ${formatCurrency(details.multiBackgroundCost, details.currency)}`
       : `Add-on available for ${formatCurrency(details.multiBackgroundFee, details.currency)}`);
@@ -1395,11 +1601,21 @@ function buildPriceBreakdownMarkup(source) {
   const prints = Number(source.prints || 0);
   const emails = Number(source.emailCount || 0);
   const multiSelected = Boolean(source.multipleBackgrounds);
+  const sceneCount = Number(charges.sceneCount || source.sceneCount || 0);
+  const extraSceneCount = Number(charges.extraSceneCount || source.extraSceneCount || 0);
+  const sceneCost = Number(charges.sceneCost || 0);
 
   const lines = [
     priceBreakdownLine('Base package', charges.basePrice, currency),
     priceBreakdownLine(`Prints (${prints} × ${formatCurrency(charges.perPrintFee, currency)})`, charges.printCost, currency),
-    priceBreakdownLine(`Emails (${emails} × ${formatCurrency(charges.perEmailFee, currency)})`, charges.emailCost, currency)
+    priceBreakdownLine(`Emails (${emails} × ${formatCurrency(charges.perEmailFee, currency)})`, charges.emailCost, currency),
+    priceBreakdownLine(
+      sceneCost > 0
+        ? `Scenes (${sceneCount} total, ${extraSceneCount} extra)`
+        : `Scenes (${sceneCount} included)`,
+      sceneCost,
+      currency
+    )
   ];
 
   const multiLabel = multiSelected ? 'Multi-background add-on' : 'Multi-background add-on (not selected)';
@@ -1451,6 +1667,8 @@ function finalizeTransaction() {
     multipleBackgrounds: pendingReceipt.multipleBackgrounds,
     createdAt: pendingReceipt.createdAt,
     people: pendingReceipt.peopleCount,
+    sceneCount: pendingReceipt.sceneCount,
+    extraSceneCount: pendingReceipt.extraSceneCount,
     selfieData: state.selfieData || null
   };
   logTransaction(receiptRecord);

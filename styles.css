@@ -923,7 +923,8 @@ label span,
   flex-wrap: nowrap;
 }
 
-.party-size-field {
+.party-size-field,
+.scene-count-field {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -935,12 +936,38 @@ label span,
   min-height: 100%;
 }
 
-.party-size-field .touch-selector {
+.party-size-field .touch-selector,
+.scene-count-field .touch-selector {
   width: 100%;
 }
 
-.party-size-field .field-label {
+.party-size-field .field-label,
+.scene-count-field .field-label {
   margin-bottom: 0.65rem;
+}
+
+.field-helper {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: #425466;
+  max-width: 320px;
+  line-height: 1.35;
+}
+
+.field-helper-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  color: #0f4c81;
+}
+
+#scene-count {
+  width: 100%;
+}
+
+#scene-count.touch-selector {
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .touch-option {
