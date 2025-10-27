@@ -1035,6 +1035,30 @@ label span,
   flex-wrap: nowrap;
 }
 
+.field-helper {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: #425466;
+  max-width: 320px;
+  line-height: 1.35;
+}
+
+.field-helper-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  color: #0f4c81;
+}
+
+#scene-count {
+  width: 100%;
+}
+
+#scene-count.touch-selector {
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
 .touch-option {
   flex: 1;
   min-width: 90px;
