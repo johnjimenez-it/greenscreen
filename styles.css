@@ -19,7 +19,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(180deg, #f6f8fb 0%, #edf1f6 100%);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 body.welcome-active {
@@ -46,11 +46,11 @@ body.welcome-active .screen-welcome {
 
 #app {
   width: min(100%, 1080px);
-  padding: clamp(2rem, 3vh, 2.75rem) clamp(1.5rem, 3vw, 2.25rem) clamp(2.25rem, 4vh, 3.5rem);
+  padding: clamp(1.25rem, 2vh, 2rem) clamp(1.25rem, 3vw, 2rem) clamp(1.75rem, 3vh, 2.75rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(1.25rem, 2.5vh, 2rem);
+  gap: clamp(0.9rem, 1.8vh, 1.5rem);
   margin: 0 auto;
   min-height: 100vh;
   height: 100vh;
@@ -59,7 +59,7 @@ body.welcome-active .screen-welcome {
 
 .app-header {
   text-align: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
 }
 
 .app-header h1 {
@@ -76,7 +76,7 @@ body.welcome-active .screen-welcome {
 .screen {
   display: none;
   background: white;
-  padding: 1.25rem 1.5rem 1.5rem;
+  padding: 1rem 1.35rem 1.25rem;
   border-radius: 24px;
   box-shadow: 0 30px 60px var(--shadow);
   max-height: 100%;
@@ -91,7 +91,7 @@ body.welcome-active .screen-welcome {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 0.75rem;
   overflow: hidden;
 }
 
@@ -240,11 +240,11 @@ body.welcome-active .screen-welcome {
 }
 
 .progress-indicator {
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 0.9rem;
   max-width: 880px;
   background: rgba(17, 36, 51, 0.04);
   border-radius: 18px;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.85rem;
   display: flex;
   justify-content: center;
   position: relative;
@@ -397,6 +397,31 @@ body.welcome-active .screen-welcome {
   border: 2px solid #deecf7;
 }
 
+.background-card-body .preview-card {
+  margin-top: 0.25rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 18px;
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.background-card-body .preview-card h3 {
+  margin: 0 0 0.2rem;
+}
+
+.background-card-body .preview-card .secondary {
+  align-self: flex-start;
+  padding: 0.7rem 1.1rem;
+  font-size: 1rem;
+}
+
+.background-card-body .preview-card .instruction {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  color: #37556c;
+}
+
 .welcome-info {
   margin-top: 0;
   width: min(100%, 560px);
@@ -487,35 +512,8 @@ body.welcome-active .screen-welcome {
   color: #4a637a;
 }
 
-.addon-card {
-  margin-top: 1rem;
-  padding: 1.25rem;
-  border-radius: 18px;
-  background: #f4f1ff;
-  border: 2px solid #dcd7f5;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.addon-card h3 {
-  margin: 0;
-  font-size: 1.35rem;
-  color: #452c63;
-}
-
-.addon-card .secondary.active {
-  background: #452c63;
-  color: #ffffff;
-  border-color: #452c63;
-}
-
-.addon-card .secondary.active:focus-visible {
-  outline-color: #ffafcc;
-}
-
 .nav-buttons {
-  margin-top: 1.25rem;
+  margin-top: 0.8rem;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -595,19 +593,38 @@ body.welcome-active .screen-welcome {
 .background-selection-card {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   flex: 1 1 auto;
-  padding: 1.1rem 1.35rem;
+  padding: 0.9rem 1.1rem 1.1rem;
   border-radius: 20px;
   background: #ffffff;
   border: 2px solid #deecf7;
   box-shadow: 0 18px 44px rgba(17, 36, 51, 0.12);
+  max-height: 72vh;
+  gap: 0.6rem;
   overflow: hidden;
+}
+
+.background-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.background-grid-wrapper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  margin-right: -0.25rem;
+  scrollbar-gutter: stable both-edges;
 }
 
 .background-card-header {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.35rem;
 }
 
 .background-card-header h2 {
@@ -616,10 +633,10 @@ body.welcome-active .screen-welcome {
 
 .background-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   border-radius: 14px;
   background: rgba(17, 36, 51, 0.04);
-  padding: 0.4rem;
+  padding: 0.35rem;
 }
 
 .background-tab {
@@ -651,33 +668,16 @@ body.welcome-active .screen-welcome {
 }
 
 .background-grid {
-  flex: 1 1 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  grid-auto-rows: clamp(150px, 18vh, 190px);
-  gap: 0.85rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-auto-rows: clamp(140px, 20vh, 180px);
+  gap: 0.75rem;
+  width: 100%;
+  padding-top: 0.25rem;
 }
 
 .background-thumb-grid {
   min-height: 0;
-}
-
-.preview-row {
-  display: flex;
-  gap: 1rem;
-  align-items: stretch;
-  flex-wrap: wrap;
-}
-
-.preview-row .preview-card,
-.preview-row .addon-card {
-  margin-top: 0;
-  flex: 1 1 0;
-}
-
-.preview-row .addon-card {
-  max-width: 320px;
 }
 
 @media (max-width: 640px) {
@@ -702,14 +702,14 @@ body.welcome-active .screen-welcome {
 
 .background-option {
   position: relative;
-  padding: 1.25rem;
+  padding: 1.1rem;
   border-radius: 18px;
   font-size: 1.25rem;
   font-weight: 600;
   color: white;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border: 4px solid transparent;
-  min-height: clamp(150px, 18vh, 190px);
+  height: 100%;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -742,7 +742,8 @@ body.welcome-active .screen-welcome {
 .background-preview {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
+  gap: 0.6rem;
+  height: 110px;
 }
 
 .background-preview.multi {
@@ -750,7 +751,7 @@ body.welcome-active .screen-welcome {
 }
 
 .preview-slot {
-  min-height: 260px;
+  height: 100%;
   border-radius: 16px;
   background: #e6eef5;
   display: flex;
@@ -759,44 +760,17 @@ body.welcome-active .screen-welcome {
   font-weight: 600;
   color: #446177;
   text-align: center;
-  padding: 1rem;
+  padding: 0.75rem;
   background-size: cover;
   background-position: center;
   transition: background-image 0.3s ease;
 }
 
 .selected-background-name {
-  margin: 0.5rem 0 0;
+  margin: 0.45rem 0 0.6rem;
   font-size: 1.1rem;
   font-weight: 600;
   color: #1b3b58;
-}
-
-.addon-card {
-  margin-top: 0;
-}
-
-@media (max-width: 1024px) {
-  .background-grid {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-    grid-auto-rows: clamp(150px, 22vh, 190px);
-  }
-}
-
-@media (max-width: 960px) {
-  .preview-row {
-    flex-direction: column;
-  }
-
-  .preview-row .addon-card {
-    max-width: none;
-  }
-}
-
-@media (max-width: 840px) {
-  .background-grid {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
-  }
 }
 
 @media (max-width: 640px) {
