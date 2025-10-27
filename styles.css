@@ -959,7 +959,7 @@ label span,
   flex-wrap: wrap;
   gap: clamp(1.4rem, 4vw, 2.5rem);
   justify-content: center;
-  align-items: stretch;
+  align-items: start;
 }
 
 .details-box {
