@@ -733,7 +733,12 @@ function getBackgroundLabel() {
 }
 
 function populateTouchSelectors() {
-  initializePeopleStepper(document.getElementById('people-count'), 1, 8);
+  initializePeopleStepper(
+    document.getElementById('people-count'),
+    1,
+    10,
+    { labelId: 'people-count-label' }
+  );
 
   createTouchSelector(
     document.getElementById('delivery-method'),
@@ -800,7 +805,7 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
   });
 }
 
-function initializePeopleStepper(container, min, max) {
+function initializePeopleStepper(container, min, max, options = {}) {
   if (!container) {
     return;
   }
@@ -809,6 +814,10 @@ function initializePeopleStepper(container, min, max) {
 
   const stepper = document.createElement('div');
   stepper.className = 'touch-stepper';
+  const { labelId } = options;
+  if (labelId) {
+    stepper.setAttribute('aria-labelledby', labelId);
+  }
 
   const minusBtn = document.createElement('button');
   minusBtn.type = 'button';
@@ -840,7 +849,13 @@ function initializePeopleStepper(container, min, max) {
   function updateDisplay() {
     valueDisplay.textContent = `${value}`;
     minusBtn.disabled = value <= min;
-    plusBtn.disabled = value >= max;
+    const isAtMax = value >= max;
+    if (isAtMax) {
+      plusBtn.setAttribute('aria-disabled', 'true');
+    } else {
+      plusBtn.removeAttribute('aria-disabled');
+    }
+    plusBtn.classList.toggle('at-limit', isAtMax);
   }
 
   minusBtn.addEventListener('click', () => {
@@ -852,11 +867,13 @@ function initializePeopleStepper(container, min, max) {
   });
 
   plusBtn.addEventListener('click', () => {
-    if (value < max) {
-      value += 1;
-      state.peopleCount = value;
-      updateDisplay();
+    if (value >= max) {
+      alert(`You can have up to ${max} people in the photo.`);
+      return;
     }
+    value += 1;
+    state.peopleCount = value;
+    updateDisplay();
   });
 
   updateDisplay();
