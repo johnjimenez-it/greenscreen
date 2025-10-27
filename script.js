@@ -31,6 +31,7 @@ const state = {
   background: null,
   backgroundSource: null,
   backgroundSelections: [],
+  selectedBackgroundCategory: null,
   partyName: '',
   peopleCount: null,
   deliveryMethod: null,
@@ -76,6 +77,9 @@ const backgroundGradients = {
   beach: 'linear-gradient(135deg, #ffb347, #ffcc33)',
   stage: 'linear-gradient(135deg, #414141, #000000)'
 };
+
+let backgroundCategories = [];
+let backgroundsByCategory = new Map();
 
 const IDLE_TIMEOUT = 25000;
 const IDLE_PROMPT_DURATION = 10000;
@@ -243,7 +247,9 @@ function init() {
   renderProgressIndicator();
   setupNavigation();
   populateEventInfo();
+  prepareBackgroundData();
   populateBackgrounds();
+  setupBackgroundCategoryNavigation();
   setupBackgroundAddons();
   populateTouchSelectors();
   setupSelfie();
@@ -268,6 +274,17 @@ function setupNavigation() {
   document.getElementById('start-btn').addEventListener('click', () => showScreen('screen-background'));
   document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', goToNextScreen));
   document.querySelectorAll('[data-prev]').forEach(btn => btn.addEventListener('click', goToPreviousScreen));
+}
+
+function setupBackgroundCategoryNavigation() {
+  const backButton = document.getElementById('background-category-back');
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      state.selectedBackgroundCategory = null;
+      populateBackgrounds();
+      backButton.blur();
+    });
+  }
 }
 
 function populateEventInfo() {
@@ -298,22 +315,239 @@ function populateEventInfo() {
 }
 
 function populateBackgrounds() {
-  const template = document.getElementById('background-option-template');
+  if (!appConfig) {
+    return;
+  }
+
+  if (!backgroundCategories.length || !backgroundsByCategory.size) {
+    prepareBackgroundData();
+  }
+
+  const categoryView = document.getElementById('background-category-view');
+  const optionsView = document.getElementById('background-options-view');
+  const categoryGrid = document.getElementById('background-category-grid');
   const grid = document.getElementById('background-grid');
+
+  if (!categoryGrid || !grid) {
+    return;
+  }
+
+  if (!state.selectedBackgroundCategory && state.backgroundSelections.length) {
+    const firstSelection = state.backgroundSelections[0];
+    const selectionCategoryId = getBackgroundCategoryKey(firstSelection);
+    if (selectionCategoryId && backgroundsByCategory.has(selectionCategoryId)) {
+      state.selectedBackgroundCategory = selectionCategoryId;
+    }
+  }
+
+  if (!state.selectedBackgroundCategory && backgroundCategories.length === 1) {
+    state.selectedBackgroundCategory = backgroundCategories[0].id;
+  }
+
+  if (!state.selectedBackgroundCategory) {
+    if (optionsView) {
+      optionsView.classList.add('hidden');
+    }
+    grid.innerHTML = '';
+    if (categoryView) {
+      categoryView.classList.remove('hidden');
+    }
+    renderBackgroundCategories(categoryGrid);
+    updateBackgroundPreview();
+    return;
+  }
+
+  if (categoryView) {
+    categoryView.classList.add('hidden');
+  }
+  if (optionsView) {
+    optionsView.classList.remove('hidden');
+  }
+
+  renderBackgroundOptions(grid, state.selectedBackgroundCategory);
+  updateBackgroundOptionSelectionClasses();
+  updateBackgroundPreview();
+}
+
+function renderBackgroundCategories(container) {
+  const template = document.getElementById('background-category-template');
+  if (!template || !container) {
+    return;
+  }
+
+  container.innerHTML = '';
+
+  backgroundCategories.forEach(category => {
+    if (!backgroundsByCategory.has(category.id)) {
+      return;
+    }
+
+    const option = template.content.firstElementChild.cloneNode(true);
+    option.dataset.categoryId = category.id;
+
+    const titleEl = option.querySelector('.category-title');
+    if (titleEl) {
+      titleEl.textContent = category.name;
+    }
+
+    const countEl = option.querySelector('.category-count');
+    if (countEl) {
+      const count = (backgroundsByCategory.get(category.id) || []).length;
+      countEl.textContent = `${count} ${count === 1 ? 'option' : 'options'}`;
+    }
+
+    const descriptionEl = option.querySelector('.category-description');
+    if (descriptionEl) {
+      descriptionEl.textContent = category.description || '';
+      descriptionEl.classList.toggle('hidden', !category.description);
+    }
+
+    const hasSelection = state.backgroundSelections.some(selection => getBackgroundCategoryKey(selection) === category.id);
+    option.classList.toggle('contains-selection', hasSelection);
+
+    option.addEventListener('click', () => {
+      state.selectedBackgroundCategory = category.id;
+      populateBackgrounds();
+    });
+
+    container.appendChild(option);
+  });
+}
+
+function renderBackgroundOptions(grid, categoryId) {
+  const template = document.getElementById('background-option-template');
+  if (!template || !grid) {
+    return;
+  }
+
+  const backgrounds = backgroundsByCategory.get(categoryId) || [];
   grid.innerHTML = '';
-  appConfig.backgrounds.forEach((background, index) => {
+
+  backgrounds.forEach((background, index) => {
     const option = template.content.firstElementChild.cloneNode(true);
     option.style.backgroundImage = getBackgroundImage(background);
-    option.querySelector('.label').textContent = background.name;
+    const label = option.querySelector('.label');
+    if (label) {
+      label.textContent = background.name;
+    }
     option.title = `Tap to choose ${background.name}`;
-    const optionId = background.id || `background-${index}`;
+    const optionId = background.id || `background-${categoryId}-${index}`;
     option.dataset.backgroundId = optionId;
     option.addEventListener('click', () => selectBackground(background, optionId));
     grid.appendChild(option);
   });
 
-  updateBackgroundOptionSelectionClasses();
-  updateBackgroundPreview();
+  const category = backgroundCategories.find(item => item.id === categoryId);
+  const titleEl = document.getElementById('background-category-title');
+  if (titleEl) {
+    titleEl.textContent = category ? category.name : 'Backgrounds';
+  }
+
+  const descriptionEl = document.getElementById('background-category-description');
+  if (descriptionEl) {
+    const description = category && category.description ? category.description : '';
+    descriptionEl.textContent = description;
+    descriptionEl.classList.toggle('hidden', !description);
+  }
+
+  grid.setAttribute('aria-label', category ? `${category.name} backgrounds` : 'Background choices');
+}
+
+function prepareBackgroundData() {
+  if (!appConfig) {
+    return;
+  }
+
+  const backgrounds = Array.isArray(appConfig.backgrounds) ? appConfig.backgrounds : [];
+  const categoriesConfig = Array.isArray(appConfig.backgroundCategories) ? appConfig.backgroundCategories : [];
+
+  const normalizedCategories = categoriesConfig.map(category => {
+    const id = category.id || slugify(category.name);
+    return {
+      id,
+      name: category.name || formatCategoryLabel(id),
+      description: category.description || ''
+    };
+  });
+
+  const normalizedCategoryMap = new Map();
+  normalizedCategories.forEach(category => {
+    normalizedCategoryMap.set(category.id, category);
+  });
+
+  const normalizedBackgrounds = backgrounds.map(background => {
+    const categoryId = getBackgroundCategoryKey(background) || 'other';
+    const configuredCategory = normalizedCategoryMap.get(categoryId);
+    const categoryName = background.categoryName || background.category || (configuredCategory ? configuredCategory.name : formatCategoryLabel(categoryId));
+    return {
+      ...background,
+      categoryId,
+      categoryName
+    };
+  });
+
+  const categoryMap = new Map();
+  normalizedBackgrounds.forEach(background => {
+    if (!categoryMap.has(background.categoryId)) {
+      categoryMap.set(background.categoryId, []);
+    }
+    categoryMap.get(background.categoryId).push(background);
+  });
+
+  const discoveredCategories = [];
+  categoryMap.forEach((items, id) => {
+    if (!normalizedCategoryMap.has(id)) {
+      const sample = items[0] || {};
+      discoveredCategories.push({
+        id,
+        name: sample.categoryName || formatCategoryLabel(id),
+        description: ''
+      });
+    }
+  });
+
+  discoveredCategories.sort((a, b) => a.name.localeCompare(b.name));
+
+  backgroundCategories = normalizedCategories
+    .filter(category => categoryMap.has(category.id))
+    .concat(discoveredCategories);
+
+  backgroundsByCategory = categoryMap;
+  appConfig.backgrounds = normalizedBackgrounds;
+
+  if (state.selectedBackgroundCategory && !backgroundsByCategory.has(state.selectedBackgroundCategory)) {
+    state.selectedBackgroundCategory = null;
+  }
+}
+
+function getBackgroundCategoryKey(background) {
+  if (!background) {
+    return null;
+  }
+  if (background.categoryId) {
+    return background.categoryId;
+  }
+  if (background.category) {
+    return slugify(background.category);
+  }
+  return null;
+}
+
+function formatCategoryLabel(value) {
+  if (!value) {
+    return 'Backgrounds';
+  }
+  return String(value)
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'other';
 }
 
 function selectBackground(background, optionId) {
@@ -322,6 +556,10 @@ function selectBackground(background, optionId) {
   const selection = { ...background, id: selectionId, image: backgroundImage };
 
   state.backgroundSource = 'preset';
+  const categoryId = getBackgroundCategoryKey(background);
+  if (categoryId) {
+    state.selectedBackgroundCategory = categoryId;
+  }
 
   if (state.multipleBackgrounds) {
     const existingIndex = state.backgroundSelections.findIndex(item => item.id === selection.id);
@@ -345,7 +583,7 @@ function selectBackground(background, optionId) {
 
 function updateBackgroundOptionSelectionClasses() {
   const selectedIds = new Set(state.backgroundSelections.map(item => item.id));
-  document.querySelectorAll('.background-option').forEach(btn => {
+  document.querySelectorAll('#background-grid .background-option').forEach(btn => {
     const id = btn.dataset.backgroundId;
     btn.classList.toggle('selected', selectedIds.has(id));
   });
@@ -834,6 +1072,7 @@ function resetKiosk() {
     background: null,
     backgroundSource: null,
     backgroundSelections: [],
+    selectedBackgroundCategory: null,
     partyName: '',
     peopleCount: null,
     deliveryMethod: null,
@@ -846,7 +1085,7 @@ function resetKiosk() {
   });
 
   furthestProgressIndex = -1;
-  document.querySelectorAll('.background-option').forEach(btn => btn.classList.remove('selected'));
+  document.querySelectorAll('#background-grid .background-option').forEach(btn => btn.classList.remove('selected'));
   updateBackgroundOptionSelectionClasses();
   updateBackgroundPreview();
   document.querySelectorAll('.touch-selector').forEach(selector => selector.querySelectorAll('.touch-option').forEach(btn => btn.classList.remove('selected')));
@@ -854,6 +1093,7 @@ function resetKiosk() {
   document.getElementById('emailInputs').innerHTML = '';
   document.getElementById('review-summary').innerHTML = '';
   pendingReceipt = null;
+  populateBackgrounds();
   reflectMultiBackgroundState();
   updatePricingDisplay();
   updateProgress('screen-welcome');
