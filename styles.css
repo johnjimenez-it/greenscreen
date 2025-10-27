@@ -53,6 +53,8 @@ body.welcome-active .screen-welcome {
   gap: clamp(2rem, 4vh, 2.75rem);
   margin: 0 auto;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app-header {
@@ -77,10 +79,24 @@ body.welcome-active .screen-welcome {
   padding: 1.5rem;
   border-radius: 24px;
   box-shadow: 0 30px 60px var(--shadow);
+  max-height: 100%;
+  overflow: auto;
 }
 
 .screen.active {
   display: block;
+}
+
+.screen-background {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.screen-background.active {
+  display: flex;
 }
 
 .screen-welcome {
@@ -554,10 +570,20 @@ body.welcome-active .screen-welcome {
   margin-top: 0.5rem;
 }
 
-.background-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+.background-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.background-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .background-selection {
@@ -566,120 +592,63 @@ body.welcome-active .screen-welcome {
   gap: 1.25rem;
 }
 
-.background-subtitle {
-  margin: 0 0 0.5rem;
-  font-size: 1.35rem;
-}
-
-.category-grid {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.category-option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  padding: 1.35rem;
-  border-radius: 18px;
+.background-selection-card {
+  flex: 1 1 auto;
+  padding: 1.35rem 1.5rem;
+  border-radius: 20px;
   background: #ffffff;
-  border: 3px solid transparent;
-  box-shadow: 0 14px 28px rgba(17, 36, 51, 0.12);
-  text-align: left;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-  color: inherit;
-  font-size: 1rem;
+  border: 2px solid #deecf7;
+  box-shadow: 0 18px 44px rgba(17, 36, 51, 0.12);
+  overflow: hidden;
 }
 
-.category-option:hover,
-.category-option:focus {
-  transform: translateY(-4px);
-  border-color: var(--secondary);
-  box-shadow: 0 18px 36px rgba(17, 36, 51, 0.16);
-  outline: none;
-}
-
-.category-option.contains-selection {
-  border-color: var(--secondary);
-  box-shadow: 0 18px 36px rgba(17, 36, 51, 0.2);
-}
-
-.category-option .category-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-}
-
-.category-option .category-count {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--primary-dark);
-}
-
-.category-option .category-description {
-  font-size: 0.95rem;
-  color: #446177;
-  line-height: 1.4;
-}
-
-.background-options-header {
+.background-tabs {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  gap: 0.75rem;
+  border-radius: 14px;
+  background: rgba(17, 36, 51, 0.04);
+  padding: 0.5rem;
 }
 
-.background-options-title {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.background-options-title h3 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.background-category-description {
-  margin: 0;
-  font-size: 1rem;
-  color: #446177;
-}
-
-.link-button {
-  background: none;
+.background-tab {
+  flex: 1 1 0;
   border: none;
-  color: var(--primary);
+  border-radius: 12px;
+  background: transparent;
+  padding: 0.85rem 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #32546d;
   cursor: pointer;
-  padding: 0.25rem 0;
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
-.link-button:hover,
-.link-button:focus {
-  text-decoration: underline;
-  outline: none;
+.background-tab.active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(17, 36, 51, 0.18);
 }
 
-.background-layout {
-  display: flex;
-  gap: 2rem;
+.background-tab:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 2px;
 }
 
-.background-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.background-tab:active {
+  transform: scale(0.97);
 }
 
-@media (max-width: 900px) {
-  .background-layout {
-    flex-direction: column;
-  }
+.background-grid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(150px, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.background-thumb-grid {
+  min-height: 0;
 }
 
 @media (max-width: 640px) {
@@ -711,9 +680,13 @@ body.welcome-active .screen-welcome {
   color: white;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border: 4px solid transparent;
-  min-height: 120px;
+  min-height: 150px;
   background-size: cover;
   background-position: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .background-option.selected {
@@ -725,11 +698,16 @@ body.welcome-active .screen-welcome {
   transform: translateY(-4px);
 }
 
+.background-option:focus-visible {
+  outline: 3px solid var(--secondary);
+  outline-offset: 3px;
+}
+
 .background-option .label {
-  position: absolute;
-  bottom: 12px;
-  left: 16px;
   font-size: 1.1rem;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.35));
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
 }
 
 .background-preview {
@@ -756,6 +734,49 @@ body.welcome-active .screen-welcome {
   background-size: cover;
   background-position: center;
   transition: background-image 0.3s ease;
+}
+
+.selected-background-name {
+  margin: 0.5rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1b3b58;
+}
+
+.addon-card {
+  margin-top: 0;
+}
+
+@media (max-width: 1024px) {
+  .background-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(150px, 1fr);
+  }
+}
+
+@media (max-width: 840px) {
+  .background-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .screen-background {
+    gap: 1.25rem;
+  }
+
+  .background-selection-card {
+    padding: 1rem 1.1rem;
+  }
+
+  .background-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(140px, 1fr);
+  }
+
+  .background-option {
+    min-height: 140px;
+  }
 }
 
 .preview-slot.secondary {
