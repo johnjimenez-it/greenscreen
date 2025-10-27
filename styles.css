@@ -918,10 +918,18 @@ body.welcome-active .screen-welcome {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+label span,
+.field-label {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
 .party-card {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 2.2vh, 1.75rem);
+  gap: clamp(1.1rem, 2vh, 1.6rem);
   width: min(100%, 820px);
   margin: 0 auto;
 }
@@ -929,52 +937,89 @@ body.welcome-active .screen-welcome {
 .party-name-field {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.55rem;
+  max-width: clamp(320px, 50%, 420px);
+  margin: 0 auto;
+  text-align: center;
+  align-items: center;
+}
+
+.party-name-field input {
+  max-width: 100%;
+  align-self: stretch;
+}
+
+.party-name-field > span {
   width: 100%;
+  margin-bottom: 0.35rem;
 }
 
 .party-details-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(1rem, 2vw, 1.5rem);
+  gap: clamp(1.4rem, 4vw, 2.5rem);
   justify-content: center;
   align-items: stretch;
 }
 
-.party-counter-card {
-  flex: 1 1 320px;
+.details-box {
+  background-color: #f8fbff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  flex: 1;
+  min-width: min(320px, 100%);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  text-align: left;
-  padding: clamp(0.85rem, 1.8vh, 1.25rem) clamp(1rem, 2.3vw, 1.6rem)
-    clamp(1.1rem, 2.4vh, 1.65rem);
-  border-radius: 18px;
-  background: rgba(17, 36, 51, 0.03);
-  border: 1px solid rgba(29, 143, 203, 0.12);
-  min-height: 100%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(14, 40, 77, 0.08);
 }
 
-.party-counter-card .field-label {
-  margin-bottom: 0.5rem;
+.details-box h3 {
+  color: #0e284d;
+  font-size: 20px;
+  margin-bottom: 12px;
 }
 
-.party-counter-card .field-helper {
-  margin-bottom: 0.9rem;
-  max-width: none;
-  text-align: left;
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
 }
 
-.party-counter-card .field-helper-note {
-  margin-top: 0.35rem;
+.included-info {
+  font-size: 14px;
+  color: #63728a;
+  margin-top: -6px;
+  margin-bottom: 10px;
 }
 
-.party-counter-card .touch-selector {
-  width: 100%;
+@media (max-width: 900px) {
+  .party-card {
+    padding: 0;
+  }
+
+  .party-details-grid {
+    gap: clamp(1.25rem, 4vw, 2rem);
+  }
 }
 
-.party-counter-card .touch-stepper {
-  margin: 0 auto;
+@media (max-width: 640px) {
+  .details-box {
+    flex: 1 1 100%;
+  }
+
+  .stepper {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stepper button,
+  .stepper span {
+    width: min(220px, 100%);
+  }
 }
 
 .party-nav {
@@ -988,75 +1033,11 @@ body.welcome-active .screen-welcome {
   min-width: clamp(150px, 18vw, 200px);
 }
 
-label span,
-.field-label {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.touch-selector {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-#people-count {
-  width: 100%;
-}
-
-#people-count.touch-selector {
-  justify-content: center;
-  flex-wrap: nowrap;
-}
-
 .field-helper {
-  margin: 0 0 0.75rem;
-  font-size: 0.95rem;
-  color: #425466;
-  max-width: 320px;
-  line-height: 1.35;
-}
-
-.field-helper-note {
-  display: block;
-  margin-top: 0.35rem;
-  font-weight: 600;
-  color: #0f4c81;
-}
-
-#scene-count {
-  width: 100%;
-}
-
-#scene-count.touch-selector {
-  justify-content: center;
-  flex-wrap: nowrap;
-}
-
-.field-helper {
-  margin: 0 0 0.75rem;
-  font-size: 0.95rem;
-  color: #425466;
-  max-width: 320px;
-  line-height: 1.35;
-}
-
-.field-helper-note {
-  display: block;
-  margin-top: 0.35rem;
-  font-weight: 600;
-  color: #0f4c81;
-}
-
-#scene-count {
-  width: 100%;
-}
-
-#scene-count.touch-selector {
-  justify-content: center;
-  flex-wrap: nowrap;
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.85);
+  line-height: 1.4;
 }
 
 .touch-option {
@@ -1075,36 +1056,7 @@ label span,
   background: #e2f4ff;
 }
 
-.touch-stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0 auto;
-  width: 100%;
-  justify-content: center;
-}
-
-@media (max-width: 900px) {
-  .party-card {
-    padding: 0;
-  }
-
-  .party-details-grid {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 640px) {
-  .party-counter-card {
-    flex: 1 1 100%;
-  }
-
-  .party-nav button {
-    min-width: 140px;
-  }
-}
-
-.touch-stepper-button {
+.stepper button {
   border-radius: 16px;
   border: 3px solid #c7d9e8;
   background: white;
@@ -1117,8 +1069,8 @@ label span,
   transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.touch-stepper-button:hover:not(:disabled),
-.touch-stepper-button:focus-visible {
+.stepper button:hover:not(:disabled),
+.stepper button:focus-visible {
   border-color: var(--primary);
   background: #e2f4ff;
   box-shadow: 0 10px 20px rgba(68, 111, 138, 0.25);
@@ -1126,37 +1078,37 @@ label span,
   transform: translateY(-1px);
 }
 
-.touch-stepper-button:active:not(:disabled) {
+.stepper button:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: none;
 }
 
-.touch-stepper-button:disabled {
+.stepper button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
 
-.touch-stepper-button[aria-disabled='true'] {
+.stepper button[aria-disabled='true'] {
   opacity: 0.65;
   cursor: pointer;
   box-shadow: none;
 }
 
-.touch-stepper-button[aria-disabled='true']:hover,
-.touch-stepper-button[aria-disabled='true']:focus-visible {
+.stepper button[aria-disabled='true']:hover,
+.stepper button[aria-disabled='true']:focus-visible {
   transform: none;
   box-shadow: none;
 }
 
-.touch-stepper-button.at-limit {
+.stepper button.at-limit {
   border-color: #d6e2ef;
   background: #f4f8fc;
   color: #7890a5;
 }
 
-.touch-stepper-value {
+.stepper span {
   border-radius: 16px;
   border: 3px solid #c7d9e8;
   background: #f8fbff;
