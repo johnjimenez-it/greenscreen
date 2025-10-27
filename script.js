@@ -754,8 +754,7 @@ function populateTouchSelectors() {
     SCENE_MAX,
     {
       labelId: 'scene-count-label',
-      helperId: 'scene-count-helper',
-      noteId: 'scene-included-note'
+      helperId: 'scene-count-helper'
     }
   );
 
@@ -907,7 +906,7 @@ function initializeSceneStepper(container, min = SCENE_MIN, max = SCENE_MAX, opt
 
   const stepper = document.createElement('div');
   stepper.className = 'touch-stepper';
-  const { labelId, helperId, noteId } = options;
+  const { labelId, helperId } = options;
   if (labelId) {
     stepper.setAttribute('aria-labelledby', labelId);
   }
@@ -945,7 +944,6 @@ function initializeSceneStepper(container, min = SCENE_MIN, max = SCENE_MAX, opt
     plusBtn,
     valueDisplay,
     helperId,
-    noteId,
     stepper
   };
 
@@ -1002,7 +1000,7 @@ function updateSceneStepperDisplay() {
   if (!sceneStepperControls) {
     return;
   }
-  const { min, max, minusBtn, plusBtn, valueDisplay, helperId, noteId } = sceneStepperControls;
+  const { min, max, minusBtn, plusBtn, valueDisplay, helperId } = sceneStepperControls;
   const sceneValue = ensureSceneCountIsValid();
   const included = getIncludedSceneCount();
 
@@ -1021,16 +1019,11 @@ function updateSceneStepperDisplay() {
   if (helperId) {
     const helper = document.getElementById(helperId);
     if (helper) {
-      helper.dataset.included = `${included}`;
-    }
-  }
-
-  if (noteId) {
-    const note = document.getElementById(noteId);
-    if (note) {
-      note.textContent = included > 0
-        ? `Included with backgrounds: ${included}`
-        : '';
+      const currency = (appConfig && appConfig.currency) || 'USD';
+      const extraSceneFee = getFeeValue('extraSceneFee', PRICING_DEFAULTS.extraSceneFee);
+      const formattedFee = formatCurrency(extraSceneFee, currency);
+      const includedText = included === 1 ? '1' : `${included}`;
+      helper.textContent = `Included: ${includedText} (Extra +${formattedFee} each after included)`;
     }
   }
 }

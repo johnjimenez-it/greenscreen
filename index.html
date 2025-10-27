@@ -108,22 +108,28 @@
         </label>
         <div class="form-grid party-details-grid">
           <div class="party-size-field party-counter-card">
-            <span id="people-count-label" class="field-label">How many people?</span>
-            <div class="touch-selector" id="people-count" role="group" aria-labelledby="people-count-label"></div>
+            <div class="party-counter-header">
+              <span id="people-count-label" class="field-label">How many people?</span>
+              <p class="field-helper" aria-hidden="true">&nbsp;</p>
+            </div>
+            <div class="party-counter-body">
+              <div class="touch-selector" id="people-count" role="group" aria-labelledby="people-count-label"></div>
+            </div>
           </div>
           <div class="scene-count-field party-counter-card">
-            <span id="scene-count-label" class="field-label">How many scenes?</span>
-            <p id="scene-count-helper" class="field-helper">
-              More scenes = more poses and photos. Some included with your backgrounds.
-              <span id="scene-included-note" class="field-helper-note"></span>
-            </p>
-            <div
-              class="touch-selector"
-              id="scene-count"
-              role="group"
-              aria-labelledby="scene-count-label"
-              aria-describedby="scene-count-helper"
-            ></div>
+            <div class="party-counter-header">
+              <span id="scene-count-label" class="field-label">How many scenes?</span>
+              <p id="scene-count-helper" class="field-helper">Included: 0 (Extra +$5.00 each after included)</p>
+            </div>
+            <div class="party-counter-body">
+              <div
+                class="touch-selector"
+                id="scene-count"
+                role="group"
+                aria-labelledby="scene-count-label"
+                aria-describedby="scene-count-helper"
+              ></div>
+            </div>
           </div>
         </div>
         <div class="nav-buttons party-nav">
