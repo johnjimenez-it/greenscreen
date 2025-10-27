@@ -40,7 +40,8 @@ const state = {
   emails: [],
   paymentMethod: null,
   selfieData: null,
-  multipleBackgrounds: false
+  multipleBackgrounds: false,
+  showingAllBackgroundCategories: false
 };
 
 const PRICING_DEFAULTS = {
@@ -281,6 +282,7 @@ function setupBackgroundCategoryNavigation() {
   if (backButton) {
     backButton.addEventListener('click', () => {
       state.selectedBackgroundCategory = null;
+      state.showingAllBackgroundCategories = true;
       populateBackgrounds();
       backButton.blur();
     });
@@ -323,6 +325,9 @@ function populateBackgrounds() {
     prepareBackgroundData();
   }
 
+  const showAllCategories = state.showingAllBackgroundCategories;
+  state.showingAllBackgroundCategories = false;
+
   const categoryView = document.getElementById('background-category-view');
   const optionsView = document.getElementById('background-options-view');
   const categoryGrid = document.getElementById('background-category-grid');
@@ -332,7 +337,7 @@ function populateBackgrounds() {
     return;
   }
 
-  if (!state.selectedBackgroundCategory && state.backgroundSelections.length) {
+  if (!state.selectedBackgroundCategory && state.backgroundSelections.length && !showAllCategories) {
     const firstSelection = state.backgroundSelections[0];
     const selectionCategoryId = getBackgroundCategoryKey(firstSelection);
     if (selectionCategoryId && backgroundsByCategory.has(selectionCategoryId)) {
@@ -340,7 +345,7 @@ function populateBackgrounds() {
     }
   }
 
-  if (!state.selectedBackgroundCategory && backgroundCategories.length === 1) {
+  if (!state.selectedBackgroundCategory && backgroundCategories.length === 1 && !showAllCategories) {
     state.selectedBackgroundCategory = backgroundCategories[0].id;
   }
 
@@ -406,6 +411,7 @@ function renderBackgroundCategories(container) {
     option.classList.toggle('contains-selection', hasSelection);
 
     option.addEventListener('click', () => {
+      state.showingAllBackgroundCategories = false;
       state.selectedBackgroundCategory = category.id;
       populateBackgrounds();
     });
