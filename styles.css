@@ -115,6 +115,24 @@ body.welcome-active .screen-welcome {
   display: block;
 }
 
+.screen-party {
+  overflow: hidden;
+  display: none;
+  padding: clamp(1rem, 2.2vh, 1.5rem) clamp(1.2rem, 2.6vw, 2rem);
+}
+
+.screen-party.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.screen-party h2 {
+  font-size: clamp(1.6rem, 2.2vw, 1.9rem);
+  text-align: center;
+  margin-bottom: clamp(0.35rem, 1vh, 0.6rem);
+}
+
 .screen-background {
   height: 100%;
   display: flex;
@@ -900,6 +918,76 @@ body.welcome-active .screen-welcome {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.party-card {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.2vh, 1.75rem);
+  width: min(100%, 820px);
+  margin: 0 auto;
+}
+
+.party-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.party-details-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  justify-content: center;
+  align-items: stretch;
+}
+
+.party-counter-card {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  padding: clamp(0.85rem, 1.8vh, 1.25rem) clamp(1rem, 2.3vw, 1.6rem)
+    clamp(1.1rem, 2.4vh, 1.65rem);
+  border-radius: 18px;
+  background: rgba(17, 36, 51, 0.03);
+  border: 1px solid rgba(29, 143, 203, 0.12);
+  min-height: 100%;
+}
+
+.party-counter-card .field-label {
+  margin-bottom: 0.5rem;
+}
+
+.party-counter-card .field-helper {
+  margin-bottom: 0.9rem;
+  max-width: none;
+  text-align: left;
+}
+
+.party-counter-card .field-helper-note {
+  margin-top: 0.35rem;
+}
+
+.party-counter-card .touch-selector {
+  width: 100%;
+}
+
+.party-counter-card .touch-stepper {
+  margin: 0 auto;
+}
+
+.party-nav {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.party-nav button {
+  min-width: clamp(150px, 18vw, 200px);
+}
+
 label span,
 .field-label {
   display: block;
@@ -923,24 +1011,28 @@ label span,
   flex-wrap: nowrap;
 }
 
-.party-size-field {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0.35rem 0.5rem 0.75rem;
-  border-radius: 18px;
-  background: rgba(17, 36, 51, 0.03);
-  border: 1px solid rgba(29, 143, 203, 0.12);
-  min-height: 100%;
+.field-helper {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  color: #425466;
+  max-width: 320px;
+  line-height: 1.35;
 }
 
-.party-size-field .touch-selector {
+.field-helper-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  color: #0f4c81;
+}
+
+#scene-count {
   width: 100%;
 }
 
-.party-size-field .field-label {
-  margin-bottom: 0.65rem;
+#scene-count.touch-selector {
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .touch-option {
@@ -966,6 +1058,26 @@ label span,
   margin: 0 auto;
   width: 100%;
   justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .party-card {
+    padding: 0;
+  }
+
+  .party-details-grid {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .party-counter-card {
+    flex: 1 1 100%;
+  }
+
+  .party-nav button {
+    min-width: 140px;
+  }
 }
 
 .touch-stepper-button {
