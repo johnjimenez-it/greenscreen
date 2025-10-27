@@ -127,6 +127,18 @@ body.welcome-active .screen-welcome {
   display: flex;
 }
 
+.screen-background-preview {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.screen-background-preview.active {
+  display: flex;
+}
+
 .screen-welcome {
   padding: clamp(2.5rem, 6vw, 4rem);
   display: none;
@@ -609,14 +621,6 @@ body.welcome-active .screen-welcome {
   overflow: hidden;
 }
 
-.background-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
 .background-selection {
   display: flex;
   flex-direction: column;
@@ -652,6 +656,21 @@ body.welcome-active .screen-welcome {
   padding: 0 0.2rem;
   margin-right: -0.2rem;
   scrollbar-gutter: stable both-edges;
+}
+
+.background-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.background-controls #multi-background-toggle {
+  min-width: 0;
+  width: min(100%, 360px);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.9rem 1.2rem;
+  border-radius: 16px;
 }
 
 .background-card-header {
@@ -793,11 +812,31 @@ body.welcome-active .screen-welcome {
   border-radius: 12px;
 }
 
+
+.background-preview-layout {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.75rem;
+}
+
+.background-preview-card {
+  width: min(800px, 100%);
+  gap: 1.25rem;
+}
+
+.background-preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
 .background-preview {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.45rem;
-  height: 72px;
+  gap: 0.75rem;
+  height: 220px;
 }
 
 .background-preview.multi {
@@ -806,7 +845,7 @@ body.welcome-active .screen-welcome {
 
 .preview-slot {
   height: 100%;
-  border-radius: 16px;
+  border-radius: 20px;
   background: #e6eef5;
   display: flex;
   align-items: center;
@@ -818,14 +857,7 @@ body.welcome-active .screen-welcome {
   background-size: cover;
   background-position: center;
   transition: background-image 0.3s ease;
-}
-
-.background-selection-card > #selected-background-name {
-  display: none;
-}
-
-.background-column .addon-card {
-  display: none;
+  box-shadow: inset 0 0 0 2px rgba(17, 36, 51, 0.08);
 }
 
 .selected-background-name {
