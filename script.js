@@ -62,7 +62,9 @@ const PAYMENT_EMOJI_MAP = {
   Cash: '💵',
   'Credit Card': '💳',
   'Debit Card': '🏧',
-  Zelle: '🏦'
+  Zelle: '🏦',
+  Venmo: '📲',
+  'Cash App': '💸'
 };
 
 const DELIVERY_EMOJI_MAP = {
