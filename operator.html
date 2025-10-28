@@ -82,6 +82,7 @@
     }
 
     input[type="password"],
+    input[type="text"],
     input[type="date"],
     textarea {
       background: var(--surface-300);
@@ -95,6 +96,7 @@
     }
 
     input[type="password"]:focus,
+    input[type="text"]:focus,
     input[type="date"]:focus,
     textarea:focus {
       outline: none;
@@ -441,12 +443,14 @@
         </div>
       </div>
       <div id="dateFilters" class="filters" style="display:none;">
-        <span>Filter by date:</span>
+        <span>Filters:</span>
         <label for="startDate">From</label>
         <input type="date" id="startDate" name="startDate" />
         <label for="endDate">To</label>
         <input type="date" id="endDate" name="endDate" />
-        <button type="button" id="clearDateFilters" class="btn btn-ghost" disabled>Clear</button>
+        <label for="customerSearch">Customer ID</label>
+        <input type="text" id="customerSearch" name="customerSearch" placeholder="Search..." />
+        <button type="button" id="clearDateFilters" class="btn btn-ghost" disabled>Reset Filters</button>
       </div>
     </div>
 
@@ -504,6 +508,7 @@
     const startDateInput = document.getElementById("startDate");
     const endDateInput = document.getElementById("endDate");
     const clearDateFiltersBtn = document.getElementById("clearDateFilters");
+    const customerSearchInput = document.getElementById("customerSearch");
     const modalBackdrop = document.getElementById("receiptModal");
     const modalCloseBtn = document.getElementById("modalClose");
     const modalTitle = document.getElementById("modalTitle");
@@ -561,10 +566,17 @@
       });
     });
 
+    if (customerSearchInput) {
+      customerSearchInput.addEventListener('input', () => {
+        applyFilters();
+      });
+    }
+
     if (clearDateFiltersBtn) {
       clearDateFiltersBtn.addEventListener('click', () => {
         if (startDateInput) startDateInput.value = '';
         if (endDateInput) endDateInput.value = '';
+        if (customerSearchInput) customerSearchInput.value = '';
         applyFilters();
       });
     }
@@ -893,10 +905,17 @@
       }
       const startDate = parseDateInput(startDateInput ? startDateInput.value : '', 'start');
       const endDate = parseDateInput(endDateInput ? endDateInput.value : '', 'end');
-      if (!startDate && !endDate) {
-        return [...recordsCache];
-      }
-      return recordsCache.filter((record) => recordMatchesDateRange(record, startDate, endDate));
+      const query = customerSearchInput ? customerSearchInput.value.trim().toLowerCase() : '';
+
+      return recordsCache.filter((record) => {
+        if (!recordMatchesDateRange(record, startDate, endDate)) {
+          return false;
+        }
+        if (query && !recordMatchesCustomerSearch(record, query)) {
+          return false;
+        }
+        return true;
+      });
     }
 
     function parseDateInput(value, bound) {
@@ -921,6 +940,21 @@
       return true;
     }
 
+    function recordMatchesCustomerSearch(record, query) {
+      const possibleValues = [
+        record.customerNumber,
+        record.photoID,
+        getRecordId(record)
+      ];
+      return possibleValues.some((value) =>
+        typeof value === 'string'
+          ? value.toLowerCase().includes(query)
+          : typeof value === 'number'
+            ? String(value).toLowerCase().includes(query)
+            : false
+      );
+    }
+
     function getRecordDate(record) {
       if (!record) return null;
       if (record.createdAt) {
@@ -940,7 +974,11 @@
 
     function updateClearDateFiltersState() {
       if (!clearDateFiltersBtn) return;
-      const hasValue = Boolean((startDateInput && startDateInput.value) || (endDateInput && endDateInput.value));
+      const hasValue = Boolean(
+        (startDateInput && startDateInput.value) ||
+        (endDateInput && endDateInput.value) ||
+        (customerSearchInput && customerSearchInput.value)
+      );
       clearDateFiltersBtn.disabled = !hasValue;
     }
   </script>
