@@ -85,7 +85,7 @@ Config is validated on boot; kiosk displays maintenance screen if invalid.
 
 ### 4.6 Payment
 - Payment cards show icon + label. Disabled methods appear greyed with tooltip “Unavailable for this event”.
-- If cash is selected, instructions display: “Present payment to attendant now.” Tap to pay shows: “Hold your card or phone near the reader.”
+- If cash is selected, instructions display: “Present payment to attendant now.”
 - Credit/debit selection integrates with payment terminal (out of scope but placeholder instructions).
 
 ### 4.7 Review
