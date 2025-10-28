@@ -1321,6 +1321,9 @@ label span,
   border-radius: 16px;
   background: #000;
   min-height: 240px;
+  max-height: 320px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
 .selfie-actions {
