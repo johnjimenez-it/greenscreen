@@ -61,7 +61,8 @@ const SCENE_MAX = 8;
 const PAYMENT_EMOJI_MAP = {
   Cash: '💵',
   'Credit Card': '💳',
-  'Debit Card': '🏧'
+  'Debit Card': '🏧',
+  Zelle: '🏦'
 };
 
 let currentScreenIndex = 0;
