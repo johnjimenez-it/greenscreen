@@ -264,6 +264,7 @@ function init() {
   if (!appConfig) return;
   renderProgressIndicator();
   setupNavigation();
+  setupReviewSummaryEditing();
   populateEventInfo();
   prepareBackgroundData();
   populateBackgrounds();
@@ -292,6 +293,24 @@ function setupNavigation() {
   setupWelcomeScreenTap();
   document.querySelectorAll('[data-next]').forEach(btn => btn.addEventListener('click', goToNextScreen));
   document.querySelectorAll('[data-prev]').forEach(btn => btn.addEventListener('click', goToPreviousScreen));
+}
+
+function setupReviewSummaryEditing() {
+  const summary = document.getElementById('review-summary');
+  if (!summary) {
+    return;
+  }
+
+  summary.addEventListener('click', event => {
+    const button = event.target.closest('.summary-edit');
+    if (!button) {
+      return;
+    }
+    const targetScreen = button.dataset.editTarget;
+    if (targetScreen) {
+      showScreen(targetScreen);
+    }
+  });
 }
 
 function setupWelcomeScreenTap() {
@@ -1439,6 +1458,20 @@ function onConfirm() {
   showConfirmModal();
 }
 
+function buildSummaryRow(label, value, options = {}) {
+  const { editTarget = '', editLabel = label } = options;
+  const editButton = editTarget
+    ? `<button type="button" class="summary-edit" data-edit-target="${editTarget}" aria-label="Edit ${escapeHtml(editLabel)}" title="Edit ${escapeHtml(editLabel)}">✏️</button>`
+    : '';
+  return `
+    <div class="summary-row">
+      <span class="summary-label">${escapeHtml(label)}</span>
+      <span class="summary-value">${value}</span>
+      ${editButton}
+    </div>
+  `;
+}
+
 function generateSummaryHTML() {
   const priceDetails = calculatePriceDetails();
   const priceText = priceDetails ? formatCurrency(priceDetails.total, priceDetails.currency) : 'Free';
@@ -1446,6 +1479,8 @@ function generateSummaryHTML() {
   const partyName = escapeHtml(state.partyName);
   const deliveryMethod = escapeHtml(state.deliveryMethod);
   const paymentMethod = escapeHtml(state.paymentMethod);
+  const peopleCount = state.peopleCount != null ? `${state.peopleCount}` : '—';
+  const sceneCount = state.sceneCount != null ? `${state.sceneCount}` : '—';
   const previewReceipt = {
     charges: priceDetails,
     prints: state.prints,
@@ -1454,18 +1489,26 @@ function generateSummaryHTML() {
     sceneCount: state.sceneCount,
     extraSceneCount: priceDetails ? priceDetails.extraSceneCount : Math.max((state.sceneCount || 0) - getIncludedSceneCount(), 0)
   };
+  const summaryRows = [
+    buildSummaryRow('Party', partyName, { editTarget: 'screen-party', editLabel: 'party details' }),
+    buildSummaryRow(getBackgroundLabel(), backgroundSummary, { editTarget: 'screen-background', editLabel: 'background selection' }),
+    buildSummaryRow('People in photo', escapeHtml(peopleCount), { editTarget: 'screen-party', editLabel: 'number of people' }),
+    buildSummaryRow('Scenes', escapeHtml(sceneCount), { editTarget: 'screen-party', editLabel: 'scene count' }),
+    buildSummaryRow('Delivery', deliveryMethod, { editTarget: 'screen-delivery', editLabel: 'delivery options' }),
+    buildSummaryRow('Prints', escapeHtml(`${state.prints}`), { editTarget: 'screen-delivery', editLabel: 'print quantity' }),
+    buildSummaryRow('Email count', escapeHtml(`${state.emailCount}`), { editTarget: 'screen-delivery', editLabel: 'email quantity' }),
+    buildSummaryRow('Multi-background add-on', escapeHtml(state.multipleBackgrounds ? 'Yes' : 'No'), {
+      editTarget: 'screen-background',
+      editLabel: 'multi-background add-on'
+    }),
+    buildSummaryRow('Payment', paymentMethod, { editTarget: 'screen-payment', editLabel: 'payment method' }),
+    buildSummaryRow('Total', escapeHtml(priceText))
+  ];
   return `
     <h3>You're all set!</h3>
-    <p><strong>Party:</strong> ${partyName}</p>
-    <p><strong>${getBackgroundLabel()}:</strong> ${backgroundSummary}</p>
-    <p><strong>People in photo:</strong> ${state.peopleCount}</p>
-    <p><strong>Scenes:</strong> ${state.sceneCount}</p>
-    <p><strong>Delivery:</strong> ${deliveryMethod}</p>
-    <p><strong>Prints:</strong> ${state.prints}</p>
-    <p><strong>Email count:</strong> ${state.emailCount}</p>
-    <p><strong>Multi-background add-on:</strong> ${state.multipleBackgrounds ? 'Yes' : 'No'}</p>
-    <p><strong>Payment:</strong> ${paymentMethod}</p>
-    <p><strong>Total:</strong> ${priceText}</p>
+    <div class="summary-list">
+      ${summaryRows.join('')}
+    </div>
     ${buildPriceBreakdownMarkup(previewReceipt)}
   `;
 }
