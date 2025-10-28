@@ -782,10 +782,13 @@ body.welcome-active .screen-welcome {
 
 .background-controls {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.75rem;
 }
 
+.background-controls #custom-background-button,
 .background-controls #multi-background-toggle {
   min-width: 0;
   width: min(100%, 360px);
@@ -793,6 +796,20 @@ body.welcome-active .screen-welcome {
   font-weight: 600;
   padding: 0.9rem 1.2rem;
   border-radius: 16px;
+}
+
+.custom-background-status {
+  margin: 0;
+  max-width: 420px;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #446177;
+}
+
+.custom-background-status.active {
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .background-card-header {
@@ -980,6 +997,12 @@ body.welcome-active .screen-welcome {
   background-position: center;
   transition: background-image 0.3s ease;
   box-shadow: inset 0 0 0 2px rgba(17, 36, 51, 0.08);
+}
+
+.preview-slot.custom-request {
+  background: rgba(32, 191, 85, 0.15);
+  color: #1b3b58;
+  box-shadow: inset 0 0 0 2px rgba(32, 191, 85, 0.4);
 }
 
 .selected-background-name {
@@ -1397,6 +1420,24 @@ label span,
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.modal textarea {
+  width: 100%;
+  border-radius: 18px;
+  border: 2px solid #d7e4ef;
+  padding: 1rem 1.1rem;
+  font-size: 1.05rem;
+  font-family: inherit;
+  resize: none;
+  background: #f7fbff;
+  color: #112433;
+  box-shadow: inset 0 1px 2px rgba(17, 36, 51, 0.08);
+}
+
+.modal textarea:focus {
+  outline: 3px solid rgba(32, 191, 85, 0.35);
+  border-color: rgba(32, 191, 85, 0.6);
 }
 
 .keyboard-screen {
