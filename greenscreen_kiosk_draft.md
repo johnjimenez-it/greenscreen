@@ -28,7 +28,7 @@
    - For prints: stepper control with max defined in config, cost updates in real time.
    - Summary chip shows running subtotal (price × quantity) pulled from pricing table.
 6. **Payment Method**
-   - Grid of payment cards (cash, tap to pay, debit, credit) filtered by config; selecting one reveals contextual instructions (e.g., “Hold near reader when prompted”).
+   - Grid of payment cards (💵 Cash, 💳 Credit Card, 🏧 Debit Card) filtered by config; selecting one reveals contextual instructions (e.g., “Present cash to the attendant” or “Insert your card when prompted”).
    - If price is $0, auto-selects “No Payment Required” but still includes stamp placeholder on receipt.
 7. **Review & Confirm**
    - Card list summarizing Party, Background, Delivery, Prints, Payment, Total.
@@ -47,7 +47,7 @@
 - `event_name`
 - `backgrounds` array with `id`, `thumbnail_path`, `display_name`, optional `category`.
 - `pricing` object mapping `prints`, `emails` to costs; allows free flag.
-- `payment_methods` list (subset of {cash, tap_to_pay, debit, credit, none}).
+- `payment_methods` list (subset of {cash, debit, credit, none}).
 - `delivery_methods` list (digital, print, both) including maximum counts.
 - `max_prints`, `max_emails` integers.
 - `operator_contact` info (support email, hotline number).

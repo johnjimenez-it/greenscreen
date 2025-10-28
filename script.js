@@ -57,6 +57,12 @@ const PRICING_DEFAULTS = {
 const SCENE_MIN = 1;
 const SCENE_MAX = 8;
 
+const PAYMENT_EMOJI_MAP = {
+  Cash: '💵',
+  'Credit Card': '💳',
+  'Debit Card': '🏧'
+};
+
 let currentScreenIndex = 0;
 let currentKeyboardInput = null;
 let keyboardValue = '';
@@ -787,11 +793,16 @@ function populateTouchSelectors() {
   createTouchSelector(
     document.getElementById('payment-method'),
     appConfig.paymentMethods,
-    value => value,
+    formatPaymentLabel,
     value => {
       state.paymentMethod = value;
     }
   );
+}
+
+function formatPaymentLabel(value) {
+  const emoji = PAYMENT_EMOJI_MAP[value];
+  return emoji ? `${emoji} ${value}` : `${value}`;
 }
 
 function buildRange(min, max) {
@@ -807,7 +818,9 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
   container.innerHTML = '';
   options.forEach(value => {
     const btn = template.content.firstElementChild.cloneNode(true);
-    btn.textContent = labelFormatter(value);
+    const label = labelFormatter(value);
+    btn.textContent = label;
+    btn.setAttribute('aria-label', label);
     btn.addEventListener('click', () => {
       container.querySelectorAll('.touch-option').forEach(option => option.classList.remove('selected'));
       btn.classList.add('selected');
