@@ -63,6 +63,12 @@
           </div>
         </div>
         <div class="background-controls">
+          <button class="secondary" id="custom-background-button" type="button">
+            Request Custom Background
+          </button>
+          <p id="custom-background-status" class="custom-background-status">
+            Prefer a specific scene? Request a custom background.
+          </p>
           <button class="secondary" id="multi-background-toggle" type="button" aria-pressed="false">
             Add Multi-Background Package (+$10)
           </button>
@@ -235,6 +241,30 @@
       <p>We’ll return to the welcome screen in <span id="idle-countdown">10</span> seconds.</p>
       <div class="modal-actions">
         <button class="primary" id="idle-stay">I’m still here</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="custom-background-modal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="custom-background-title"
+  >
+    <div class="modal-content">
+      <h3 id="custom-background-title">Request a Custom Background</h3>
+      <p>Please describe what you want for your background.</p>
+      <label class="sr-only" for="custom-background-input">Custom background description</label>
+      <textarea
+        id="custom-background-input"
+        rows="5"
+        maxlength="240"
+        placeholder="Describe the scene, colors, or theme you have in mind."
+      ></textarea>
+      <div class="modal-actions">
+        <button class="secondary" id="custom-background-cancel" type="button">Cancel</button>
+        <button class="primary" id="custom-background-save" type="button">Save Request</button>
       </div>
     </div>
   </div>
