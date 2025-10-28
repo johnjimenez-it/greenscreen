@@ -1334,13 +1334,6 @@ function renderReceipt() {
       <p><strong>Multi-background add-on:</strong> ${multiBackgroundText}</p>
       ${breakdownMarkup}
       <p><strong>Photo ID:</strong> ${pendingReceipt.photoID}</p>
-      <div class="stamp-grid">
-        <div class="stamp-area">Paid</div>
-        <div class="stamp-area">Email Sent</div>
-        <div class="stamp-area">Printed</div>
-        <div class="stamp-area">Picked Up</div>
-        <div class="stamp-area">Photo Taken</div>
-      </div>
       <div class="notes-section">
         <p><strong>Notes:</strong> ____________________________</p>
       </div>
@@ -1363,6 +1356,13 @@ function renderReceipt() {
       <p><strong>Total:</strong> ${pendingReceipt.total}</p>
       <p><strong>Multi-background add-on:</strong> ${multiBackgroundText}</p>
       ${breakdownMarkup}
+      <div class="stamp-grid">
+        <div class="stamp-area">Paid</div>
+        <div class="stamp-area">Email Sent</div>
+        <div class="stamp-area">Printed</div>
+        <div class="stamp-area">Picked Up</div>
+        <div class="stamp-area">Photo Taken</div>
+      </div>
       <p><strong>Photo ID:</strong> <span class="large-photo-id">${pendingReceipt.photoID}</span></p>
       <div class="notes-section">
         <p><strong>Notes:</strong> ____________________________</p>
