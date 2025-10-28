@@ -32,23 +32,90 @@
     }
   ],
   "backgrounds": [
-    { "id": "fsu-garnet", "name": "FSU Garnet Lights", "categoryId": "fsu-spirit" },
-    { "id": "fsu-gold", "name": "Golden Chief Glow", "categoryId": "fsu-spirit" },
-    { "id": "fsu-spear", "name": "Spear Strike", "categoryId": "fsu-spirit" },
-    { "id": "fsu-campus", "name": "Westcott Fountain Nights", "categoryId": "fsu-spirit" },
-    { "id": "fsu-stadium", "name": "Doak Campbell Lights", "categoryId": "fsu-spirit" },
-    { "id": "fsu-warpath", "name": "Warpath Sunrise", "categoryId": "fsu-spirit" },
-    { "id": "fsu-torch", "name": "Torchlight Traditions", "categoryId": "fsu-spirit" },
-    { "id": "fsu-heritage", "name": "Heritage Hall Shine", "categoryId": "fsu-spirit" },
-    { "id": "nature-forest", "name": "Canopy Forest", "categoryId": "nature" },
-    { "id": "nature-ocean", "name": "Emerald Coast", "categoryId": "nature" },
-    { "id": "nature-mountain", "name": "Smoky Mountain Mist", "categoryId": "nature" },
-    { "id": "nature-garden", "name": "Botanical Bloom", "categoryId": "nature" },
-    { "id": "beach", "name": "Sunset Beach", "categoryId": "nature", "file": "beach.jpg" },
-    { "id": "retro-grid", "name": "Retro Grid Glow", "categoryId": "city-retro" },
-    { "id": "city-night", "name": "City Neon Nights", "categoryId": "city-retro" },
-    { "id": "neon", "name": "Neon City", "categoryId": "city-retro", "file": "neon.jpg" },
-    { "id": "cosmic", "name": "Cosmic Swirl", "categoryId": "city-retro", "file": "cosmic.jpg" },
+    {
+      "id": "fsu-logo",
+      "name": "FSU Logo",
+      "categoryId": "fsu-spirit",
+      "file": "https://wallpapers.com/images/hd/fsu-3200-x-1800-orlce768ht6jkd3w.jpg"
+    },
+    {
+      "id": "fsu-disco",
+      "name": "FSU Disco",
+      "categoryId": "fsu-spirit",
+      "file": "https://w0.peakpx.com/wallpaper/573/160/HD-wallpaper-florida-state-seminoles-glitter-logo-ncaa-purple-brown-checkered-background-usa-american-football-team-florida-state-seminoles-logo-mosaic-art-american-football-america.jpg"
+    },
+    {
+      "id": "fsu-football",
+      "name": "FSU Football",
+      "categoryId": "fsu-spirit",
+      "file": "https://wallpapers.com/images/hd/fsu-celnlnppcqenjbrq.jpg"
+    },
+    {
+      "id": "fsu-campus",
+      "name": "FSU Campus",
+      "categoryId": "fsu-spirit",
+      "file": "https://foundation.fsu.edu/sites/foundation.fsu.edu/files/images/branding/2024brand-FOUNDATION-Zoom-background-1.png"
+    },
+    {
+      "id": "fsu-stadium",
+      "name": "FSU Stadium",
+      "categoryId": "fsu-spirit",
+      "file": "https://footballstadiumdigest.com/wp-content/uploads/2018/08/Doak-Campbell-Stadium-e1533146780639.jpg"
+    },
+    {
+      "id": "frog",
+      "name": "Frog",
+      "categoryId": "nature",
+      "file": "https://wallpapers.com/images/hd/cute-frog-1920-x-1080-background-pew760f83ph0vdmd.jpg"
+    },
+    {
+      "id": "sunset-walk",
+      "name": "Sunset Walk",
+      "categoryId": "nature",
+      "file": "https://cdn.nimbusthemes.com/2017/09/09233341/Free-Nature-Backgrounds-Seaport-During-Daytime-by-Pexels.jpeg"
+    },
+    {
+      "id": "scottish-countryside",
+      "name": "Scottish Countryside",
+      "categoryId": "nature",
+      "file": "https://wallpapers.com/images/hd/1920-x-1080-nature-desktop-7h76hbdcrtpawe3i.jpg"
+    },
+    {
+      "id": "swiss-mountains",
+      "name": "Swiss Mountains",
+      "categoryId": "nature",
+      "file": "https://cdn.wallpapersafari.com/5/47/JXE2bH.jpg"
+    },
+    {
+      "id": "hawaii",
+      "name": "Hawaii",
+      "categoryId": "nature",
+      "file": "https://i.natgeofe.com/k/f576c284-661a-4046-ba51-fa95699e1a8b/hawaii-beach_16x9.png?w=1200"
+    },
+    {
+      "id": "retro-grid",
+      "name": "Retro Grid Glow",
+      "categoryId": "city-retro",
+      "file": "https://www.shutterstock.com/shutterstock/videos/1099871365/thumb/1.jpg?ip=x480"
+    },
+    {
+      "id": "city-neon-lights",
+      "name": "City Neon Lights",
+      "categoryId": "city-retro",
+      "file": "https://mymodernmet.com/wp/wp-content/uploads/2018/03/xavier-portela-new-york-glow-7.jpg"
+    },
+    {
+      "id": "neon-city",
+      "name": "Neon City",
+      "categoryId": "city-retro",
+      "file": "https://4kwallpapers.com/images/wallpapers/neon-city-futuristic-city-cyber-city-cyberpunk-cityscape-5k-3840x2160-8801.jpg"
+    },
+    {
+      "id": "cosmic-swirl",
+      "name": "Cosmic Swirl",
+      "categoryId": "city-retro",
+      "file": "https://scitechdaily.com/images/Spiral-Galaxy-NGC-6956.jpg"
+    },
     { "id": "stage", "name": "Classic Stage", "categoryId": "classic", "file": "stage.jpg" }
   ],
   "hotline": "1-800-555-4757",

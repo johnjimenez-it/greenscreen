@@ -80,23 +80,6 @@ let nextPhotoIdCache = null;
 const PHOTO_ID_STORAGE_KEY = 'photoIdCounter';
 
 const backgroundGradients = {
-  'fsu-garnet': 'linear-gradient(135deg, #782F40, #9b4a54 55%, #CEB888)',
-  'fsu-gold': 'linear-gradient(135deg, #CEB888, #fff1c1)',
-  'fsu-spear': 'linear-gradient(140deg, #782F40 15%, #CEB888 85%)',
-  'fsu-campus': 'linear-gradient(160deg, #1c2b4a, #782F40)',
-  'fsu-stadium': 'linear-gradient(135deg, #0f1a30, #782F40 65%, #CEB888)',
-  'fsu-warpath': 'linear-gradient(135deg, #782F40, #a63d40 60%, #CEB888)',
-  'fsu-torch': 'linear-gradient(140deg, #ffb347 10%, #CEB888 55%, #782F40)',
-  'fsu-heritage': 'linear-gradient(135deg, #1f2235, #782F40 55%, #CEB888)',
-  'nature-forest': 'linear-gradient(135deg, #0b3d20, #2d6a4f)',
-  'nature-ocean': 'linear-gradient(135deg, #0077b6, #00b4d8)',
-  'nature-mountain': 'linear-gradient(135deg, #355070, #6d597a)',
-  'nature-garden': 'linear-gradient(135deg, #6a994e, #a7c957)',
-  'retro-grid': 'linear-gradient(135deg, #ff0080, #7928ca)',
-  'city-night': 'linear-gradient(135deg, #0f2027, #203a43 60%, #2c5364)',
-  neon: 'linear-gradient(135deg, #2d1b69, #f72585)',
-  cosmic: 'linear-gradient(135deg, #120078, #9d0191)',
-  beach: 'linear-gradient(135deg, #ffb347, #ffcc33)',
   stage: 'linear-gradient(135deg, #414141, #000000)'
 };
 
