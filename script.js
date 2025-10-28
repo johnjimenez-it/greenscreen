@@ -60,8 +60,10 @@ const SCENE_MAX = 8;
 
 const PAYMENT_EMOJI_MAP = {
   Cash: '💵',
+  'Cash App': '💚',
   'Credit Card': '💳',
   'Debit Card': '🏧',
+  Venmo: '💙',
   Zelle: '🏦'
 };
 
