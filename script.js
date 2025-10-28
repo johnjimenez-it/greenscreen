@@ -65,6 +65,16 @@ const PAYMENT_EMOJI_MAP = {
   Zelle: '🏦'
 };
 
+const DELIVERY_EMOJI_MAP = {
+  Email: '✉️',
+  'Print Pickup': '🖨️',
+  Both: '📦'
+};
+
+let printCountField = null;
+let emailCountField = null;
+let emailInputsContainer = null;
+
 let currentScreenIndex = 0;
 let currentKeyboardInput = null;
 let keyboardValue = '';
@@ -788,13 +798,14 @@ function populateTouchSelectors() {
   createTouchSelector(
     document.getElementById('delivery-method'),
     appConfig.deliveryMethods,
-    value => value,
+    formatDeliveryLabel,
     value => {
       state.deliveryMethod = value;
+      updateDeliveryOptionsVisibility(value);
     }
   );
 
-  const printOptions = buildRange(0, appConfig.maxPrints);
+  const printOptions = buildRange(1, appConfig.maxPrints);
   createTouchSelector(
     document.getElementById('prints-count'),
     printOptions,
@@ -805,7 +816,7 @@ function populateTouchSelectors() {
     }
   );
 
-  const emailOptions = buildRange(0, appConfig.maxEmails);
+  const emailOptions = buildRange(1, appConfig.maxEmails);
   createTouchSelector(
     document.getElementById('email-count'),
     emailOptions,
@@ -825,10 +836,17 @@ function populateTouchSelectors() {
       state.paymentMethod = value;
     }
   );
+
+  updateDeliveryOptionsVisibility(state.deliveryMethod);
 }
 
 function formatPaymentLabel(value) {
   const emoji = PAYMENT_EMOJI_MAP[value];
+  return emoji ? `${emoji} ${value}` : `${value}`;
+}
+
+function formatDeliveryLabel(value) {
+  const emoji = DELIVERY_EMOJI_MAP[value];
   return emoji ? `${emoji} ${value}` : `${value}`;
 }
 
@@ -848,6 +866,7 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
     const label = labelFormatter(value);
     btn.textContent = label;
     btn.setAttribute('aria-label', label);
+    btn.dataset.value = String(value);
     btn.addEventListener('click', () => {
       container.querySelectorAll('.touch-option').forEach(option => option.classList.remove('selected'));
       btn.classList.add('selected');
@@ -855,6 +874,82 @@ function createTouchSelector(container, options, labelFormatter, onSelect) {
     });
     container.appendChild(btn);
   });
+}
+
+function ensureDeliveryFieldRefs() {
+  if (!printCountField) {
+    const printSelector = document.getElementById('prints-count');
+    printCountField = printSelector ? printSelector.closest('label') : null;
+  }
+  if (!emailCountField) {
+    const emailSelector = document.getElementById('email-count');
+    emailCountField = emailSelector ? emailSelector.closest('label') : null;
+  }
+  if (!emailInputsContainer) {
+    emailInputsContainer = document.getElementById('emailInputs');
+  }
+}
+
+function setElementVisibility(element, visible) {
+  if (!element) {
+    return;
+  }
+  element.classList.toggle('hidden', !visible);
+}
+
+function clearTouchSelection(container) {
+  if (!container) {
+    return;
+  }
+  container.querySelectorAll('.touch-option').forEach(btn => btn.classList.remove('selected'));
+}
+
+function selectTouchOption(container, value) {
+  if (!container) {
+    return;
+  }
+  const target = Array.from(container.querySelectorAll('.touch-option')).find(
+    btn => btn.dataset.value === String(value)
+  );
+  if (target) {
+    target.click();
+  }
+}
+
+function updateDeliveryOptionsVisibility(method) {
+  ensureDeliveryFieldRefs();
+  const printSelector = document.getElementById('prints-count');
+  const emailSelector = document.getElementById('email-count');
+  const normalizedMethod = method || '';
+  const showPrints = normalizedMethod === 'Print Pickup' || normalizedMethod === 'Both';
+  const showEmails = normalizedMethod === 'Email' || normalizedMethod === 'Both';
+
+  setElementVisibility(printCountField, showPrints);
+  setElementVisibility(emailCountField, showEmails);
+  setElementVisibility(emailInputsContainer, showEmails && state.emailCount > 0);
+
+  if (!showPrints) {
+    state.prints = 0;
+    clearTouchSelection(printSelector);
+  } else if (state.prints === 0 && printSelector) {
+    selectTouchOption(printSelector, 1);
+  } else if (printSelector && state.prints > 0) {
+    selectTouchOption(printSelector, state.prints);
+  }
+
+  if (!showEmails) {
+    state.emailCount = 0;
+    state.emails = [];
+    renderEmailInputs(0);
+    clearTouchSelection(emailSelector);
+  } else if (state.emailCount === 0 && emailSelector) {
+    selectTouchOption(emailSelector, 1);
+  } else if (emailSelector && state.emailCount > 0) {
+    selectTouchOption(emailSelector, state.emailCount);
+  }
+
+  setElementVisibility(emailInputsContainer, showEmails && state.emailCount > 0);
+  updatePricingDisplay();
 }
 
 function initializePeopleStepper(valueDisplay, min, max) {
