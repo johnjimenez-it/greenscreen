@@ -1656,6 +1656,10 @@ function renderReceipt() {
       <p><strong>Multi-background add-on:</strong> ${multiBackgroundText}</p>
       ${breakdownMarkup}
       <p><strong>Photo ID:</strong> ${pendingReceipt.photoID}</p>
+      <div class="stamp-grid">
+        <div class="stamp-area">Paid</div>
+        <div class="stamp-area">Picked Up</div>
+      </div>
       ${customerNotesMarkup}
       <p class="instruction">Come back at the end of the night to pick up your prints. If you do not receive your email within 2 business days, contact ${pendingReceipt.supportEmail}. Questions? Call ${pendingReceipt.hotline}.</p>
     </section>
