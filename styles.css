@@ -953,10 +953,6 @@ body.welcome-active .screen-welcome {
   box-shadow: 0 12px 24px rgba(17, 36, 51, 0.25);
 }
 
-.background-option:hover {
-  transform: translateY(-4px);
-}
-
 .background-option:focus-visible {
   outline: 3px solid var(--secondary);
   outline-offset: 3px;
@@ -1218,7 +1214,6 @@ label span,
   transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.stepper button:hover:not(:disabled),
 .stepper button:focus-visible {
   border-color: var(--primary);
   background: #e2f4ff;
@@ -1245,7 +1240,6 @@ label span,
   box-shadow: none;
 }
 
-.stepper button[aria-disabled='true']:hover,
 .stepper button[aria-disabled='true']:focus-visible {
   transform: none;
   box-shadow: none;
@@ -1382,12 +1376,8 @@ label span,
   border-radius: 8px;
 }
 
-.summary-edit:hover,
 .summary-edit:focus-visible {
   color: var(--primary);
-}
-
-.summary-edit:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
