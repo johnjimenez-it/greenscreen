@@ -1271,7 +1271,7 @@ function openCustomBackgroundModal() {
   customBackgroundModal.classList.remove('hidden');
   if (customBackgroundTextarea) {
     customBackgroundTextarea.value = state.customBackgroundRequest || '';
-    customBackgroundTextarea.focus();
+    openKeyboardForInput(customBackgroundTextarea);
   }
 }
 
@@ -1280,6 +1280,7 @@ function closeCustomBackgroundModal() {
     return;
   }
   customBackgroundModal.classList.add('hidden');
+  closeKeyboard();
 }
 
 function setupCustomBackgroundRequest() {
@@ -1292,6 +1293,15 @@ function setupCustomBackgroundRequest() {
   if (!trigger || !customBackgroundModal || !customBackgroundTextarea || !cancelBtn || !saveBtn) {
     return;
   }
+
+  customBackgroundTextarea.readOnly = true;
+  customBackgroundTextarea.addEventListener('focus', event => {
+    event.target.blur();
+    openKeyboardForInput(customBackgroundTextarea);
+  });
+  customBackgroundTextarea.addEventListener('click', () => {
+    openKeyboardForInput(customBackgroundTextarea);
+  });
 
   trigger.addEventListener('click', () => {
     openCustomBackgroundModal();
