@@ -1271,7 +1271,6 @@ function openCustomBackgroundModal() {
   customBackgroundModal.classList.remove('hidden');
   if (customBackgroundTextarea) {
     customBackgroundTextarea.value = state.customBackgroundRequest || '';
-    openKeyboardForInput(customBackgroundTextarea);
   }
 }
 
