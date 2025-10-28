@@ -55,6 +55,8 @@ const PRICING_DEFAULTS = {
   extraSceneFee: 5
 };
 
+const MULTI_BACKGROUND_LIMIT = 4;
+
 const SCENE_MIN = 1;
 const SCENE_MAX = 8;
 
@@ -161,7 +163,7 @@ function validateScreen(screenId) {
     case 'screen-background':
       const hasCustomRequest = hasCustomBackgroundRequest();
       if (state.multipleBackgrounds && state.backgroundSelections.length < 2 && !hasCustomRequest) {
-        alert('Please select two backgrounds to continue.');
+        alert('Please select at least two backgrounds to continue.');
         return false;
       }
       if (!state.multipleBackgrounds && !state.background && !hasCustomRequest) {
@@ -648,6 +650,16 @@ function hasCustomBackgroundRequest() {
   return Boolean(state.customBackgroundRequest && state.customBackgroundRequest.trim());
 }
 
+function getMultiBackgroundLimit() {
+  if (appConfig) {
+    const configValue = Number(appConfig.multiBackgroundLimit);
+    if (Number.isFinite(configValue) && configValue >= 2) {
+      return Math.floor(configValue);
+    }
+  }
+  return MULTI_BACKGROUND_LIMIT;
+}
+
 function escapeHtml(value) {
   if (value == null) {
     return '';
@@ -677,8 +689,10 @@ function selectBackground(background, optionId) {
     if (existingIndex !== -1) {
       state.backgroundSelections.splice(existingIndex, 1);
     } else {
-      if (state.backgroundSelections.length >= 2) {
-        state.backgroundSelections.shift();
+      const limit = getMultiBackgroundLimit();
+      if (state.backgroundSelections.length >= limit) {
+        alert(`You can select up to ${limit} backgrounds.`);
+        return;
       }
       state.backgroundSelections.push(selection);
     }
@@ -711,55 +725,66 @@ function updateBackgroundPreview() {
     return;
   }
 
-  const primarySlot = preview.querySelector('[data-slot="0"]');
-  const secondarySlot = preview.querySelector('[data-slot="1"]');
-  const firstSelection = state.backgroundSelections[0] || null;
-  const secondSelection = state.backgroundSelections[1] || null;
   const hasCustomRequest = hasCustomBackgroundRequest();
+  const limit = state.multipleBackgrounds ? getMultiBackgroundLimit() : 1;
+  const selections = hasCustomRequest
+    ? []
+    : (state.multipleBackgrounds
+      ? state.backgroundSelections.slice(0, limit)
+      : state.backgroundSelections.slice(0, 1));
 
-  preview.classList.toggle('multi', state.multipleBackgrounds);
+  const slots = [];
 
-  if (primarySlot) {
-    if (firstSelection) {
-      primarySlot.style.backgroundImage = firstSelection.image;
-      primarySlot.textContent = '';
-      primarySlot.classList.remove('custom-request');
-      primarySlot.removeAttribute('title');
-    } else if (hasCustomRequest) {
-      primarySlot.style.backgroundImage = '';
-      primarySlot.textContent = state.customBackgroundRequest;
-      primarySlot.classList.add('custom-request');
-      primarySlot.title = state.customBackgroundRequest;
-    } else {
-      primarySlot.style.backgroundImage = '';
-      primarySlot.textContent = 'Choose a background';
-      primarySlot.classList.remove('custom-request');
-      primarySlot.removeAttribute('title');
+  if (hasCustomRequest) {
+    slots.push({ type: 'custom', text: state.customBackgroundRequest });
+  } else if (selections.length) {
+    selections.forEach(selection => {
+      slots.push({ type: 'image', selection });
+    });
+    if (state.multipleBackgrounds && selections.length < limit) {
+      const remaining = limit - selections.length;
+      const placeholderText = remaining === 1
+        ? 'Add one more background'
+        : `Add up to ${remaining} more backgrounds`;
+      slots.push({ type: 'placeholder', text: placeholderText });
     }
+  } else {
+    const placeholderText = state.multipleBackgrounds
+      ? 'Select backgrounds to build your multi-scene package'
+      : 'Choose a background';
+    slots.push({ type: 'placeholder', text: placeholderText });
   }
 
-  if (secondarySlot) {
-    if (state.multipleBackgrounds && !hasCustomRequest) {
-      secondarySlot.classList.remove('hidden');
-      if (secondSelection) {
-        secondarySlot.style.backgroundImage = secondSelection.image;
-        secondarySlot.textContent = '';
-      } else {
-        secondarySlot.style.backgroundImage = '';
-        secondarySlot.textContent = 'Select a second background';
-      }
+  preview.innerHTML = '';
+  preview.classList.toggle('multi', state.multipleBackgrounds && !hasCustomRequest);
+  const layoutCount = hasCustomRequest ? 1 : Math.max(selections.length, 1);
+  preview.setAttribute('data-count', `${layoutCount}`);
+
+  slots.forEach((slot, index) => {
+    const element = document.createElement('div');
+    element.className = 'preview-slot';
+    element.dataset.slot = `${index}`;
+    if (slot.type === 'image' && slot.selection) {
+      element.style.backgroundImage = slot.selection.image || '';
+      element.textContent = '';
+    } else if (slot.type === 'custom') {
+      element.textContent = slot.text;
+      element.classList.add('custom-request');
+      element.title = slot.text;
     } else {
-      secondarySlot.classList.add('hidden');
-      secondarySlot.style.backgroundImage = '';
-      secondarySlot.textContent = 'Turn on Multi-Background to add another scene';
+      element.textContent = slot.text;
+      element.classList.add('placeholder');
     }
-  }
+    preview.appendChild(element);
+  });
 
   const labelEl = document.getElementById('selected-background-name');
   if (labelEl) {
-    const selections = getSelectedBackgrounds();
-    if (selections.length) {
-      labelEl.textContent = selections.map(item => item.name).join(' + ');
+    const selectionsForLabel = hasCustomRequest
+      ? []
+      : getSelectedBackgrounds();
+    if (selectionsForLabel.length) {
+      labelEl.textContent = selectionsForLabel.map(item => item.name).join(' + ');
     } else if (hasCustomRequest) {
       labelEl.textContent = `Custom request: ${state.customBackgroundRequest}`;
     } else {
@@ -1179,11 +1204,15 @@ function setupBackgroundAddons() {
       if (!state.backgroundSelections.length && state.background) {
         state.backgroundSelections = [state.background];
       }
+      const limit = getMultiBackgroundLimit();
+      if (state.backgroundSelections.length > limit) {
+        state.backgroundSelections = state.backgroundSelections.slice(0, limit);
+      }
     } else {
       state.backgroundSelections = state.backgroundSelections.slice(0, 1);
       state.background = state.backgroundSelections[0] || null;
     }
-    syncSceneSelectionWithBackgrounds();
+    reflectMultiBackgroundState();
     updatePricingDisplay();
   });
   reflectMultiBackgroundState();
@@ -1197,16 +1226,18 @@ function reflectMultiBackgroundState() {
   }
   const isActive = Boolean(state.multipleBackgrounds);
   const currency = (appConfig && appConfig.currency) || 'USD';
-  const multiFee = formatCurrency(getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee), currency);
+  const feeValue = getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee);
+  const multiFee = formatCurrency(feeValue, currency);
+  const limit = getMultiBackgroundLimit();
   toggle.classList.toggle('active', isActive);
   toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   toggle.textContent = isActive
-    ? `Multi-Background Package Added (+${multiFee})`
-    : `Add Multi-Background Package (+${multiFee})`;
+    ? `Multi-Background Package Added (+${multiFee} each extra)`
+    : `Add Multi-Background Package (+${multiFee} each extra)`;
   if (note) {
     note.textContent = isActive
-      ? 'Select two backgrounds to capture multiple scenes during your session.'
-      : 'Add a second background setup for an additional fee.';
+      ? `Select up to ${limit} backgrounds. Each extra background is ${multiFee}.`
+      : `Each extra background is ${multiFee}. Turn it on to pick multiple scenes.`;
   }
   syncSceneSelectionWithBackgrounds();
   updateBackgroundOptionSelectionClasses();
@@ -1478,6 +1509,8 @@ function generateSummaryHTML() {
   const priceDetails = calculatePriceDetails();
   const priceText = priceDetails ? formatCurrency(priceDetails.total, priceDetails.currency) : 'Free';
   const backgroundSummary = escapeHtml(getBackgroundSummaryText());
+  const backgroundCount = getSelectedBackgrounds().length;
+  const extraBackgroundCount = priceDetails ? priceDetails.extraBackgroundCount : Math.max(backgroundCount - 1, 0);
   const partyName = escapeHtml(state.partyName);
   const deliveryMethod = escapeHtml(state.deliveryMethod);
   const paymentMethod = escapeHtml(state.paymentMethod);
@@ -1488,6 +1521,8 @@ function generateSummaryHTML() {
     prints: state.prints,
     emailCount: state.emailCount,
     multipleBackgrounds: state.multipleBackgrounds,
+    backgroundCount: priceDetails ? priceDetails.backgroundCount : backgroundCount,
+    extraBackgroundCount,
     sceneCount: state.sceneCount,
     extraSceneCount: priceDetails ? priceDetails.extraSceneCount : Math.max((state.sceneCount || 0) - getIncludedSceneCount(), 0)
   };
@@ -1499,7 +1534,7 @@ function generateSummaryHTML() {
     buildSummaryRow('Delivery', deliveryMethod, { editTarget: 'screen-delivery', editLabel: 'delivery options' }),
     buildSummaryRow('Prints', escapeHtml(`${state.prints}`), { editTarget: 'screen-delivery', editLabel: 'print quantity' }),
     buildSummaryRow('Email count', escapeHtml(`${state.emailCount}`), { editTarget: 'screen-delivery', editLabel: 'email quantity' }),
-    buildSummaryRow('Multi-background add-on', escapeHtml(state.multipleBackgrounds ? 'Yes' : 'No'), {
+    buildSummaryRow('Multi-background add-on', escapeHtml(state.multipleBackgrounds ? `${backgroundCount} backgrounds` : 'No'), {
       editTarget: 'screen-background',
       editLabel: 'multi-background add-on'
     }),
@@ -1539,6 +1574,8 @@ function capturePendingReceipt() {
     backgroundId: backgroundIdSummary,
     backgroundImage: primaryBackground ? primaryBackground.image : '',
     backgroundSelections: selectedBackgrounds.map(item => ({ id: item.id, name: item.name })),
+    backgroundCount: priceDetails ? priceDetails.backgroundCount : selectedBackgrounds.length,
+    extraBackgroundCount: priceDetails ? priceDetails.extraBackgroundCount : Math.max(selectedBackgrounds.length - 1, 0),
     customBackgroundRequest: state.customBackgroundRequest || '',
     deliveryMethod: state.deliveryMethod,
     prints: state.prints,
@@ -1565,8 +1602,24 @@ function renderReceipt() {
     ? pendingReceipt.emails.map(email => `<li>${escapeHtml(email)}</li>`).join('')
     : '<li>No emails requested</li>';
   const breakdownMarkup = buildPriceBreakdownMarkup(pendingReceipt);
-  const multiBackgroundText = pendingReceipt.multipleBackgrounds ? 'Yes' : 'No';
-  const backgroundCount = Array.isArray(pendingReceipt.backgroundSelections) ? pendingReceipt.backgroundSelections.length : 0;
+  const recordedBackgroundCount = Array.isArray(pendingReceipt.backgroundSelections)
+    ? pendingReceipt.backgroundSelections.length
+    : 0;
+  const backgroundCount = Number(pendingReceipt.backgroundCount ?? recordedBackgroundCount);
+  const chargesCurrency = pendingReceipt.charges && pendingReceipt.charges.currency
+    ? pendingReceipt.charges.currency
+    : (appConfig && appConfig.currency) || 'USD';
+  const chargesExtraBackgroundCount = pendingReceipt.charges
+    ? Number(pendingReceipt.charges.extraBackgroundCount || 0)
+    : Math.max(backgroundCount - 1, 0);
+  const extraBackgroundCount = Number(pendingReceipt.extraBackgroundCount ?? chargesExtraBackgroundCount);
+  const multiFeeValue = pendingReceipt.charges
+    ? Number(pendingReceipt.charges.multiBackgroundFee || getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee))
+    : getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee);
+  const formattedMultiFee = formatCurrency(multiFeeValue, chargesCurrency);
+  const multiBackgroundText = backgroundCount > 1
+    ? `${backgroundCount} backgrounds (${extraBackgroundCount} extra × ${formattedMultiFee})`
+    : 'Single background';
   const backgroundLabel = backgroundCount > 1 ? 'Backgrounds' : 'Background';
   const backgroundIdLabel = backgroundCount > 1 ? 'Background IDs' : 'Background ID';
   const sceneCount = Number(pendingReceipt.sceneCount || 0);
@@ -1720,13 +1773,21 @@ function calculatePriceDetails() {
   const perEmailFee = getFeeValue('emailFee', PRICING_DEFAULTS.emailFee);
   const multiBackgroundFee = getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee);
   const sceneInfo = getScenePricingInfo();
+  const limit = getMultiBackgroundLimit();
+  const selectedBackgrounds = getSelectedBackgrounds();
+  const backgroundCount = state.multipleBackgrounds
+    ? Math.min(selectedBackgrounds.length, limit)
+    : Math.min(selectedBackgrounds.length, 1);
+  const extraBackgroundCount = state.multipleBackgrounds
+    ? Math.max(backgroundCount - 1, 0)
+    : 0;
 
   const prints = Math.max(Number(state.prints || 0), 0);
   const emails = Math.max(Number(state.emailCount || 0), 0);
 
   const printCost = prints * perPrintFee;
   const emailCost = emails * perEmailFee;
-  const multiBackgroundCost = state.multipleBackgrounds ? multiBackgroundFee : 0;
+  const multiBackgroundCost = extraBackgroundCount * multiBackgroundFee;
   const sceneCost = sceneInfo.sceneCost;
   const total = basePrice + printCost + emailCost + multiBackgroundCost + sceneCost;
 
@@ -1736,6 +1797,8 @@ function calculatePriceDetails() {
     perPrintFee,
     perEmailFee,
     multiBackgroundFee,
+    backgroundCount,
+    extraBackgroundCount,
     extraSceneFee: sceneInfo.extraSceneFee,
     prints,
     emails,
@@ -1764,6 +1827,8 @@ function updatePricingDisplay() {
     prints: details.prints,
     emailCount: details.emails,
     multipleBackgrounds: state.multipleBackgrounds,
+    backgroundCount: details.backgroundCount,
+    extraBackgroundCount: details.extraBackgroundCount,
     sceneCount: details.sceneCount,
     extraSceneCount: details.extraSceneCount,
     includedScenes: details.includedScenes
@@ -1877,7 +1942,10 @@ function getPriceLineItems(source) {
   const baseAmount = Number(charges.basePrice || 0);
   const multiAmount = Number(charges.multiBackgroundCost || 0);
   const multiFee = Number(charges.multiBackgroundFee ?? getFeeValue('multiBackgroundFee', PRICING_DEFAULTS.multiBackgroundFee));
-  const multiSelected = multiAmount > 0 || Boolean(source.multipleBackgrounds);
+  const backgroundCount = Number(charges.backgroundCount ?? source.backgroundCount ?? 0);
+  const extraBackgroundCount = Number(charges.extraBackgroundCount ?? source.extraBackgroundCount ?? Math.max(backgroundCount - 1, 0));
+  const formattedMultiFee = formatCurrency(multiFee, currency);
+  const multiSelected = multiAmount > 0 || extraBackgroundCount > 0;
   const sceneCost = Number(charges.sceneCost || 0);
   const printCost = Number(charges.printCost || 0);
   const emailCost = Number(charges.emailCost || 0);
@@ -1885,9 +1953,14 @@ function getPriceLineItems(source) {
   const baseDetail = includedScenes > 0
     ? `${includedScenes} scene${includedScenes === 1 ? '' : 's'} included`
     : 'No scenes included';
+  const effectiveBackgroundCount = backgroundCount > 0
+    ? backgroundCount
+    : multiSelected
+      ? extraBackgroundCount + 1
+      : 1;
   const multiDetail = multiSelected
-    ? `Selected (${formatCurrency(multiFee, currency)})`
-    : `Not selected (${formatCurrency(multiFee, currency)})`;
+    ? `${effectiveBackgroundCount} backgrounds (${extraBackgroundCount} extra × ${formattedMultiFee})`
+    : `Single background included (${formattedMultiFee} per extra)`;
   const sceneDetail = extraSceneCount > 0
     ? `${extraSceneCount} extra × ${formatCurrency(extraSceneFee, currency)}`
     : '0 extra scenes';
