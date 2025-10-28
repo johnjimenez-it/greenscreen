@@ -75,6 +75,9 @@ let welcomeTapFeedbackTimeout = null;
 let sceneStepperControls = null;
 let customBackgroundModal = null;
 let customBackgroundTextarea = null;
+let nextPhotoIdCache = null;
+
+const PHOTO_ID_STORAGE_KEY = 'photoIdCounter';
 
 const backgroundGradients = {
   'fsu-garnet': 'linear-gradient(135deg, #782F40, #9b4a54 55%, #CEB888)',
@@ -1845,8 +1848,46 @@ function sendEmails(addresses) {
   });
 }
 
+function getNextPhotoIdFromStorage() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null;
+  }
+
+  const stored = window.localStorage.getItem(PHOTO_ID_STORAGE_KEY);
+  const parsed = stored ? Number.parseInt(stored, 10) : NaN;
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+
+  window.localStorage.removeItem(PHOTO_ID_STORAGE_KEY);
+  return null;
+}
+
+function persistNextPhotoId(value) {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+
+  window.localStorage.setItem(PHOTO_ID_STORAGE_KEY, String(value));
+}
+
+function getNextPhotoId() {
+  if (nextPhotoIdCache == null) {
+    const stored = getNextPhotoIdFromStorage();
+    nextPhotoIdCache = Number.isFinite(stored) ? stored : 1000;
+  }
+  return nextPhotoIdCache;
+}
+
+function incrementPhotoId() {
+  nextPhotoIdCache = getNextPhotoId() + 1;
+  persistNextPhotoId(nextPhotoIdCache);
+}
+
 function generatePhotoID() {
-  return Math.floor(1000 + Math.random() * 9000);
+  const nextId = getNextPhotoId();
+  incrementPhotoId();
+  return nextId;
 }
 
 function updateProgress(targetId) {
