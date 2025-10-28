@@ -1539,10 +1539,11 @@ function updatePricingDisplay() {
   const paymentNote = document.getElementById('payment-note');
   if (paymentNote) {
     if (breakdownData) {
-      const noteDetails = breakdownData.items.map(item => `${item.label}: ${item.detail}`);
-      paymentNote.textContent = `Total due: ${formatCurrency(details.total, breakdownData.currency)}. ${noteDetails.join(' • ')}`;
+      paymentNote.textContent = '';
+      paymentNote.classList.add('hidden');
     } else {
       paymentNote.textContent = `Total due: ${formatCurrency(details.total, details.currency)}`;
+      paymentNote.classList.remove('hidden');
     }
   }
 
