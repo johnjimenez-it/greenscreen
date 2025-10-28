@@ -1346,6 +1346,52 @@ label span,
   margin-top: 0;
 }
 
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.summary-label {
+  font-weight: 700;
+  color: #1b3b58;
+}
+
+.summary-value {
+  color: #112433;
+  justify-self: flex-start;
+  word-break: break-word;
+}
+
+.summary-edit {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #1b3b58;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+}
+
+.summary-edit:hover,
+.summary-edit:focus-visible {
+  color: var(--primary);
+}
+
+.summary-edit:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .receipt {
   background: white;
   border: 3px solid #d8e6f3;
